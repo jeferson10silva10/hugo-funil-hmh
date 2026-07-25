@@ -162,9 +162,9 @@ export function Vsl() {
         </p>
       </div>
 
-      {/* Vídeo */}
-      <div className="bg-gold-foil mt-5 rounded-2xl p-[2px] shadow-gold">
-        <div className="relative aspect-video w-full overflow-hidden rounded-[calc(1rem-2px)] bg-black">
+      {/* Vídeo — largura total, extravasa o padding do card pra máxima área */}
+      <div className="bg-gold-foil relative -mx-6 mt-5 border-y-2 border-gold shadow-gold sm:-mx-6 sm:mt-6 sm:rounded-2xl sm:border-y-0 sm:p-[2px]">
+        <div className="relative aspect-video w-full overflow-hidden bg-black sm:rounded-[calc(1rem-2px)]">
           <iframe
             src={PANDA_VSL_SRC}
             title="Protocolo de Remoção"
