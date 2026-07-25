@@ -181,7 +181,7 @@ export function Vsl() {
           <Gift className="h-5 w-5 text-gold" /> Presentes que você ganha assistindo
         </p>
         <p className="mt-1 text-sm text-muted-foreground">
-          Ao comprar a Imersão hoje, você leva os <strong className="text-foreground">2 treinamentos</strong> abaixo — desbloqueados ao vivo pra você.
+          Continue assistindo — os <strong className="text-foreground">2 presentes</strong> serão liberados ao vivo pra você.
         </p>
         <div className="mt-3 space-y-3">
           {GIFTS.map((g, i) => {
