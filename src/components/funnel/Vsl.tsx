@@ -1,5 +1,6 @@
 "use client";
 
+import posthog from "posthog-js";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import confetti from "canvas-confetti";
@@ -42,6 +43,7 @@ function GreenCTA({ children }: { children: React.ReactNode }) {
   return (
     <a
       href={CHECKOUT_IMERSAO}
+      onClick={() => posthog.capture("checkout_clicked")}
       className="hm-shine group flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-b from-[#25a06a] to-[#1a7d4e] px-7 py-4 text-base font-semibold uppercase tracking-wide text-white shadow-elevated transition-transform duration-200 hover:brightness-110 active:scale-[0.985]"
     >
       {children}
@@ -136,11 +138,19 @@ export function Vsl() {
   useEffect(() => {
     const t1 = setTimeout(() => {
       setGift1(true);
-      if (!firedRef.current.g1) { firedRef.current.g1 = true; fireConfetti("small"); }
+      if (!firedRef.current.g1) {
+        firedRef.current.g1 = true;
+        fireConfetti("small");
+        posthog.capture("gift_1_unlocked", { seconds_watched: T_GIFT_1 });
+      }
     }, T_GIFT_1 * 1000);
     const t2 = setTimeout(() => {
       setOfferOpen(true);
-      if (!firedRef.current.off) { firedRef.current.off = true; fireConfetti("big"); }
+      if (!firedRef.current.off) {
+        firedRef.current.off = true;
+        fireConfetti("big");
+        posthog.capture("offer_unlocked", { seconds_watched: T_OFFER });
+      }
     }, T_OFFER * 1000);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []);
