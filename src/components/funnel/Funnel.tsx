@@ -267,15 +267,7 @@ function Loading({ onDone }: { onDone: () => void }) {
   return (
     <section className="bg-navy-grad shadow-elevated flex min-h-[80dvh] flex-col items-center justify-between overflow-hidden rounded-3xl px-6 py-8 text-center">
       <div className="flex w-full flex-col items-center">
-        <Image
-          src="/images/hms-logo.webp"
-          alt="Heranças da Mentalidade do Sucesso"
-          width={640}
-          height={640}
-          className="h-14 w-14 object-contain"
-          priority
-        />
-        <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-gold">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gold">
           Respiração do Hara · Técnica Japonesa
         </p>
         <h2 className="font-display mt-1 text-xl font-semibold text-white">
