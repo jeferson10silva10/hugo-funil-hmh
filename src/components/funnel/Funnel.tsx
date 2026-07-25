@@ -145,10 +145,19 @@ function Landing({ onStart }: { onStart: () => void }) {
         Você jurou que <span className="text-gold-foil">2026</span> seria diferente. Eai?
       </h1>
 
-      <p className="mx-auto mt-3 max-w-sm text-center text-[15px] leading-relaxed text-muted-foreground">
-        Não é falta de esforço. Existe uma <strong className="text-foreground">Herança
-        Mental Herdada</strong> que instalaram na sua mente antes dos 7 anos — descubra
-        qual está travando você, em 7 perguntas.
+      {/* Mini-aha: reframe de identidade JÁ na landing (segura quem sairia antes do quiz) */}
+      <div className="mx-auto mt-5 max-w-sm rounded-2xl border border-gold/25 bg-gold/8 p-4 text-center">
+        <p className="text-[15px] leading-relaxed text-foreground/90">
+          E se te disserem que <strong className="text-foreground">não é preguiça, nem
+          falta de esforço</strong> — é uma <strong className="text-gold">programação
+          que instalaram na sua mente antes dos 7 anos</strong>, e você nunca soube que
+          ela existia?
+        </p>
+      </div>
+
+      <p className="mx-auto mt-3 max-w-sm text-center text-[14px] leading-relaxed text-muted-foreground">
+        Em 7 perguntas você descobre qual <strong className="text-foreground">Herança
+        Mental Herdada</strong> está te travando — e o que fazer pra removê-la.
       </p>
 
       <div className="mt-7">
