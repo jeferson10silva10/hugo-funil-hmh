@@ -288,22 +288,20 @@ function Diagnostico({ onNext }: { onNext: () => void }) {
   const date = new Date().toLocaleDateString("pt-BR");
   return (
     <section className="shadow-elevated ring-hairline overflow-hidden rounded-3xl bg-card">
-      {/* Faixa de cabeçalho — prontuário premium */}
-      <div className="bg-navy-grad px-7 pb-6 pt-7 text-center">
-        <div className="flex justify-center">
-          <span className="bg-gold-foil inline-flex h-14 w-14 items-center justify-center rounded-full text-white shadow-gold">
-            <Award className="h-7 w-7" strokeWidth={2} />
-          </span>
-        </div>
-        <p className="mt-3 text-xs font-semibold uppercase tracking-[0.22em] text-white/70">
-          Diagnóstico HMH
-        </p>
-        <div className="mt-3 flex items-center justify-between border-t border-white/10 pt-3 text-[13px] text-white/70">
-          <span className="font-medium text-white/90">Data: {date}</span>
-          <span className="flex items-center gap-1 uppercase tracking-wide">
-            <Lock className="h-3.5 w-3.5" /> Confidencial
-          </span>
-        </div>
+      {/* Banner do diagnóstico — Mente Sabotadora × Mente Próspera */}
+      <Image
+        src="/images/diagnostico-banner.webp"
+        alt="Diagnóstico HMH — Mente Sabotadora versus Mente Próspera"
+        width={1200}
+        height={560}
+        className="h-auto w-full"
+        priority
+      />
+      <div className="flex items-center justify-between border-b border-border px-7 py-3 text-[13px] text-muted-foreground">
+        <span className="font-medium text-foreground/80">Data: {date}</span>
+        <span className="flex items-center gap-1 uppercase tracking-wide">
+          <Lock className="h-3.5 w-3.5" /> Confidencial
+        </span>
       </div>
 
       <div className="px-7 pb-7 pt-6">
