@@ -225,20 +225,6 @@ export function Vsl() {
         </div>
       </div>
 
-      {/* ⌛ Placeholder quando a oferta ainda está bloqueada */}
-      {!offerOpen && (
-        <div className="mt-6 flex flex-col items-center rounded-3xl border border-dashed border-gold/30 bg-secondary/40 p-6 text-center">
-          <Lock className="h-6 w-6 text-gold/70" />
-          <p className="font-display mt-2 text-lg font-semibold text-foreground">
-            Assista o vídeo até o final
-          </p>
-          <p className="mx-auto mt-1 max-w-xs text-sm text-muted-foreground">
-            Quando o Hugo terminar a explicação, sua condição especial (Imersão + os 2 bônus) será
-            liberada aqui embaixo — automaticamente.
-          </p>
-        </div>
-      )}
-
       {offerOpen && (
       <>
       {/* Antes & Depois */}
