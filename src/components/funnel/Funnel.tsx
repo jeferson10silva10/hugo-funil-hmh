@@ -14,6 +14,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { QUIZ_QUESTIONS, PERFIS, calcularArquetipo, citarResposta, type Arquetipo } from "@/data/quiz";
+import { track, trackMeta } from "@/lib/analytics";
 import { Vsl } from "./Vsl";
 
 type Stage = "landing" | "quiz" | "loading" | "diagnostico" | "bridge" | "vsl";
@@ -43,20 +44,33 @@ export function Funnel() {
   }, []);
 
   const startQuiz = () => {
+    track("funnel_quiz_start");
     setStage("quiz");
   };
 
-  // Áudio preparatório toca no momento da virada diagnóstico → vídeo (clique do CTA do diagnóstico)
   const goToVideo = () => {
+    track("funnel_diag_cta_click", { arquetipo });
     playTransition();
     setStage("bridge");
   };
 
   const answer = (key: string) => {
-    setAnswers((prev) => [...prev, key]);
+    const q = QUIZ_QUESTIONS[qIndex];
+    const opt = q.options.find((o) => o.key === key);
+    const nextAnswers = [...answers, key];
+    track("funnel_quiz_answer", {
+      qId: q.id,
+      qIndex: qIndex + 1,
+      option: key,
+      weight: opt?.weight ?? "",
+    });
+    setAnswers(nextAnswers);
     if (qIndex < QUIZ_QUESTIONS.length - 1) {
       setQIndex((i) => i + 1);
     } else {
+      const finalArquetipo = calcularArquetipo(nextAnswers);
+      track("funnel_quiz_complete", { arquetipo: finalArquetipo, total: nextAnswers.length });
+      trackMeta("Lead", { content_name: "Diagnóstico HMH", arquetipo: finalArquetipo });
       setStage("loading");
     }
   };
@@ -113,6 +127,9 @@ function PrimaryButton({
 
 /* ---------------- Landing ---------------- */
 function Landing({ onStart }: { onStart: () => void }) {
+  useEffect(() => {
+    track("funnel_landing_view");
+  }, []);
   return (
     <section className="shadow-elevated ring-hairline rounded-3xl bg-card p-7">
       <Image
@@ -255,6 +272,7 @@ function Loading({ onDone }: { onDone: () => void }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
+    track("funnel_loading_view");
     const start = performance.now();
     const DURATION = BREATH_TOTAL * 1000;
     let raf = 0;
@@ -369,6 +387,9 @@ function Diagnostico({
   arquetipo: Arquetipo;
   answers: string[];
 }) {
+  useEffect(() => {
+    track("funnel_diag_view", { arquetipo });
+  }, [arquetipo]);
   const date = new Date().toLocaleDateString("pt-BR");
   const perfil = PERFIS[arquetipo];
   // Prova personalizada: cita a resposta da pergunta de auto-sacrifício (q6) — a corda mais forte da VSL
@@ -531,10 +552,15 @@ function Diagnostico({
 function Bridge({ onNext }: { onNext: () => void }) {
   const [left, setLeft] = useState(15);
   useEffect(() => {
+    track("funnel_bridge_view");
     const iv = setInterval(() => setLeft((l) => (l > 0 ? l - 1 : 0)), 1000);
     return () => clearInterval(iv);
   }, []);
   const ready = left <= 0;
+  const handleClick = () => {
+    track("funnel_bridge_cta_click");
+    onNext();
+  };
 
   return (
     <section className="shadow-elevated ring-hairline rounded-3xl bg-card p-7">
@@ -567,7 +593,7 @@ function Bridge({ onNext }: { onNext: () => void }) {
       <div className="mt-7">
         {ready ? (
           <div className="hm-fade-up">
-            <PrimaryButton onClick={onNext}>Assistir ao vídeo</PrimaryButton>
+            <PrimaryButton onClick={handleClick}>Assistir ao vídeo</PrimaryButton>
           </div>
         ) : (
           <button

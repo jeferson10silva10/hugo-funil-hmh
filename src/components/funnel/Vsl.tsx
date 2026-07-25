@@ -18,6 +18,7 @@ import {
   Clock,
 } from "lucide-react";
 import { PANDA_VSL_SRC, CHECKOUT_IMERSAO } from "@/data/quiz";
+import { track, trackMeta } from "@/lib/analytics";
 
 /* ⌛ Liberação por tempo (em segundos) — a página abre com presentes/oferta bloqueados */
 const T_GIFT_1 = 60;        // 1 min → libera Presente 1 + confete pequeno
@@ -38,10 +39,15 @@ function fireConfetti(intensity: "small" | "big" = "small") {
 }
 
 /* CTA verde da oferta */
-function GreenCTA({ children }: { children: React.ReactNode }) {
+function GreenCTA({ children, position }: { children: React.ReactNode; position: string }) {
+  const handleClick = () => {
+    track("funnel_offer_cta_click", { position });
+    trackMeta("InitiateCheckout", { content_name: "Imersão HMH", value: 77, currency: "BRL", position });
+  };
   return (
     <a
       href={CHECKOUT_IMERSAO}
+      onClick={handleClick}
       className="hm-shine group flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-b from-[#25a06a] to-[#1a7d4e] px-7 py-4 text-base font-semibold uppercase tracking-wide text-white shadow-elevated transition-transform duration-200 hover:brightness-110 active:scale-[0.985]"
     >
       {children}
@@ -134,13 +140,23 @@ export function Vsl() {
   const firedRef = useRef({ g1: false, off: false });
 
   useEffect(() => {
+    track("funnel_vsl_view");
+    trackMeta("ViewContent", { content_name: "VSL Heranças Mentais Herdadas" });
     const t1 = setTimeout(() => {
       setGift1(true);
-      if (!firedRef.current.g1) { firedRef.current.g1 = true; fireConfetti("small"); }
+      if (!firedRef.current.g1) {
+        firedRef.current.g1 = true;
+        fireConfetti("small");
+        track("funnel_vsl_gift1_unlock", { at_seconds: T_GIFT_1 });
+      }
     }, T_GIFT_1 * 1000);
     const t2 = setTimeout(() => {
       setOfferOpen(true);
-      if (!firedRef.current.off) { firedRef.current.off = true; fireConfetti("big"); }
+      if (!firedRef.current.off) {
+        firedRef.current.off = true;
+        fireConfetti("big");
+        track("funnel_vsl_offer_unlock", { at_seconds: T_OFFER });
+      }
     }, T_OFFER * 1000);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []);
@@ -342,7 +358,7 @@ export function Vsl() {
           </ul>
 
           <div className="mt-6">
-            <GreenCTA>Quero minha vaga agora</GreenCTA>
+            <GreenCTA position="lote1">Quero minha vaga agora</GreenCTA>
           </div>
           <p className="mt-3 flex items-center justify-center gap-1.5 text-sm text-white/60">
             <Lock className="h-3.5 w-3.5" /> Pagamento 100% seguro via Hotmart
@@ -414,7 +430,7 @@ export function Vsl() {
           disso, o investimento sobe.
         </p>
         <div className="mt-4">
-          <GreenCTA>Quero minha vaga agora</GreenCTA>
+          <GreenCTA position="final">Quero minha vaga agora</GreenCTA>
         </div>
         <p className="mt-3 flex items-center justify-center gap-1.5 text-sm text-muted-foreground">
           <Lock className="h-3.5 w-3.5" /> Pagamento 100% seguro via Hotmart · Garantia de 30 dias
