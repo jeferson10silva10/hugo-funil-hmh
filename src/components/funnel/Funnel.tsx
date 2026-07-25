@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { Award, ArrowRight, Lock, Sparkles, ShieldCheck } from "lucide-react";
+import { Award, ArrowRight, Lock, Sparkles, ShieldCheck, Volume2, VolumeX } from "lucide-react";
 import { QUIZ_QUESTIONS } from "@/data/quiz";
 import { Vsl } from "./Vsl";
 
@@ -196,22 +196,14 @@ function Quiz({ index, onAnswer }: { index: number; onAnswer: (k: string) => voi
   );
 }
 
-/* ---------------- Loading + Respiração japonesa (Hara) ---------------- */
-// [rótulo, segundos, escala-alvo do círculo]
-const BREATH_PHASES: [string, number, number][] = [
-  ["Inspire", 4, 1],
-  ["Segure", 2, 1],
-  ["Solte", 4, 0.6],
-  ["Segure", 2, 0.6],
-];
-const BREATH_TOTAL = 30; // segundos
+/* ---------------- Loading + Respiração japonesa (Hara) — vídeo guiado ---------------- */
+const BREATH_TOTAL = 34; // segundos — duração do vídeo respiracao.mp4
 
 function Loading({ onDone }: { onDone: () => void }) {
   const [pct, setPct] = useState(0);
-  const [phase, setPhase] = useState(0);
-  const [count, setCount] = useState(BREATH_PHASES[0][1]);
+  const [muted, setMuted] = useState(true);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
-  // progresso total → conclui em 30s
   useEffect(() => {
     const start = performance.now();
     const DURATION = BREATH_TOTAL * 1000;
@@ -220,78 +212,87 @@ function Loading({ onDone }: { onDone: () => void }) {
       const p = Math.min(100, Math.round(((now - start) / DURATION) * 100));
       setPct(p);
       if (p < 100) raf = requestAnimationFrame(tick);
-      else setTimeout(onDone, 500);
+      else setTimeout(onDone, 400);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
   }, [onDone]);
 
-  // motor das fases da respiração
-  useEffect(() => {
-    const secs = BREATH_PHASES[phase][1];
-    setCount(secs);
-    const adv = setTimeout(() => setPhase((p) => (p + 1) % BREATH_PHASES.length), secs * 1000);
-    const iv = setInterval(() => setCount((c) => (c > 1 ? c - 1 : c)), 1000);
-    return () => {
-      clearTimeout(adv);
-      clearInterval(iv);
-    };
-  }, [phase]);
+  const toggleMute = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.muted = !v.muted;
+    setMuted(v.muted);
+    if (!v.muted) void v.play().catch(() => {});
+  };
 
-  const [label, secs, scale] = BREATH_PHASES[phase];
   const left = Math.max(0, Math.ceil(((100 - pct) / 100) * BREATH_TOTAL));
 
   return (
-    <section className="bg-navy-grad shadow-elevated flex min-h-[80dvh] flex-col items-center justify-center rounded-3xl px-7 py-12 text-center">
-      <div className="overflow-hidden rounded-2xl border border-white/10">
+    <section className="bg-navy-grad shadow-elevated flex min-h-[80dvh] flex-col items-center justify-between overflow-hidden rounded-3xl px-6 py-8 text-center">
+      <div className="flex w-full flex-col items-center">
         <Image
           src="/images/hms-logo.webp"
           alt="Heranças da Mentalidade do Sucesso"
           width={640}
           height={640}
-          className="h-24 w-24 object-contain"
+          className="h-14 w-14 object-contain"
           priority
         />
+        <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-gold">
+          Respiração do Hara · Técnica Japonesa
+        </p>
+        <h2 className="font-display mt-1 text-xl font-semibold text-white">
+          Antes do seu diagnóstico, respire comigo
+        </h2>
       </div>
 
-      <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.2em] text-gold">
-        Respiração do Hara · Técnica Japonesa
-      </p>
-      <h2 className="font-display mt-1 text-2xl font-semibold text-white">
-        Antes do seu diagnóstico, respire comigo
-      </h2>
-      <p className="mx-auto mt-2 max-w-xs text-[14px] leading-relaxed text-white/70">
-        O Hugo usa essa respiração pra acalmar a mente e preparar você pra receber o resultado.
-        Só siga o círculo.
-      </p>
-
-      {/* Círculo de respiração */}
-      <div className="relative mt-5 flex h-[186px] w-[186px] items-center justify-center">
-        <div className="hm-pulse absolute inset-0 rounded-full border border-dashed border-gold/30" />
-        <div
-          className="bg-gold-foil flex h-28 w-28 items-center justify-center rounded-full text-[#1a2440] shadow-gold"
-          style={{ transform: `scale(${scale})`, transition: `transform ${secs}s ease-in-out` }}
-        >
-          <div>
-            <span className="block text-[13px] font-bold uppercase tracking-wide">{label}</span>
-            <b className="text-3xl font-extrabold leading-none">{count}</b>
-          </div>
+      {/* Vídeo guiado — autoplay mudo, botão de som */}
+      <div className="relative mt-3 w-full max-w-[280px] overflow-hidden rounded-3xl border-2 border-gold/40 shadow-gold">
+        <div className="relative aspect-[9/16] w-full bg-black">
+          <video
+            ref={videoRef}
+            src="/videos/respiracao.mp4"
+            poster="/videos/respiracao-poster.jpg"
+            autoPlay
+            muted
+            playsInline
+            preload="auto"
+            className="absolute inset-0 h-full w-full object-cover"
+            onEnded={onDone}
+          />
+          <button
+            onClick={toggleMute}
+            aria-label={muted ? "Ativar som" : "Silenciar"}
+            className="absolute right-3 top-3 flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm transition hover:bg-black/80"
+          >
+            {muted ? (
+              <>
+                <VolumeX className="h-3.5 w-3.5" /> Ativar som
+              </>
+            ) : (
+              <>
+                <Volume2 className="h-3.5 w-3.5" /> Som ligado
+              </>
+            )}
+          </button>
         </div>
       </div>
 
-      <div className="mt-6 h-2 w-full max-w-xs overflow-hidden rounded-full bg-white/12">
-        <div
-          className="bg-gold-foil h-full rounded-full transition-[width] duration-150"
-          style={{ width: `${pct}%` }}
-        />
+      <div className="mt-4 flex w-full flex-col items-center">
+        <div className="h-2 w-full max-w-xs overflow-hidden rounded-full bg-white/12">
+          <div
+            className="bg-gold-foil h-full rounded-full transition-[width] duration-150"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+        <p className="mt-2 text-sm font-semibold tabular-nums text-white/85">
+          {left > 0 ? `Seu prontuário em ${left}s` : "Pronto!"}
+        </p>
+        <p className="mt-3 flex items-center gap-1.5 text-xs text-white/55">
+          <Lock className="h-3.5 w-3.5" /> Suas respostas são completamente confidenciais
+        </p>
       </div>
-      <p className="mt-2 text-sm font-semibold tabular-nums text-white/85">
-        {left > 0 ? `Seu prontuário em ${left}s` : "Pronto!"}
-      </p>
-
-      <p className="mt-4 flex items-center gap-1.5 text-xs text-white/55">
-        <Lock className="h-3.5 w-3.5" /> Suas respostas são completamente confidenciais
-      </p>
     </section>
   );
 }
