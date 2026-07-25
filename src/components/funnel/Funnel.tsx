@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { Award, ArrowRight, Lock, Sparkles, ShieldCheck, Volume2, VolumeX } from "lucide-react";
+import { Award, ArrowRight, Lock, Sparkles, ShieldCheck, Volume2, VolumeX, AlertTriangle } from "lucide-react";
 import { QUIZ_QUESTIONS } from "@/data/quiz";
 import { Vsl } from "./Vsl";
 
@@ -388,14 +388,16 @@ function Diagnostico({ onNext }: { onNext: () => void }) {
           </p>
         </div>
 
-        <div className="mt-5 rounded-2xl bg-secondary/70 p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-            Prognóstico sem intervenção
-          </p>
-          <p className="mt-1 text-[15px] leading-relaxed text-foreground/85">
-            Se você não remover essa Herança nos próximos 6 meses, 2026 vai ser igual a 2025.
-            Que foi igual a 2024. E você sabe disso.
-          </p>
+        <div className="hm-glow-red mt-5 flex gap-3 rounded-2xl border-l-4 border-destructive bg-destructive/8 p-4">
+          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-destructive">
+              ⚠ Prognóstico sem intervenção
+            </p>
+            <p className="mt-1.5 text-[15px] leading-relaxed text-foreground/90">
+              Se você não remover essa Herança nos <strong className="text-destructive">próximos 6 meses</strong>, 2026 vai ser igual a 2025. Que foi igual a 2024. <strong className="text-foreground">E você sabe disso.</strong>
+            </p>
+          </div>
         </div>
 
         <div className="mt-5 flex gap-3 rounded-2xl border border-gold/30 bg-gold/8 p-4">

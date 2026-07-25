@@ -199,6 +199,10 @@
   0%, 100% { box-shadow: 0 0 0 1px rgba(189,135,40,.4), 0 14px 44px -14px rgba(189,135,40,.4); }
   50% { box-shadow: 0 0 0 1px rgba(189,135,40,.75), 0 18px 60px -10px rgba(189,135,40,.7); }
 }
+@keyframes hmGlowRed {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(185,28,28,0); }
+  50% { box-shadow: 0 0 0 4px rgba(185,28,28,0.12); }
+}
 @keyframes hmShine {
   0% { transform: translateX(-130%) skewX(-18deg); }
   60%, 100% { transform: translateX(240%) skewX(-18deg); }
@@ -210,6 +214,7 @@
 
 .hm-fade-up { animation: hmFadeUp .7s cubic-bezier(0.22,1,0.36,1) both; }
 .hm-glow { animation: hmGlow 3s ease-in-out infinite; }
+.hm-glow-red { animation: hmGlowRed 2.4s ease-in-out infinite; }
 .hm-pulse { animation: hmPulseRing 2.4s ease-in-out infinite; }
 
 /* Brilho que passa por cima (preço, CTA, selos) */
@@ -226,6 +231,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hm-fade-up, .hm-glow, .hm-pulse { animation: none; }
+  .hm-fade-up, .hm-glow, .hm-glow-red, .hm-pulse { animation: none; }
   .hm-shine::after { display: none; }
 }
