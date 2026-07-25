@@ -1,5 +1,6 @@
 "use client";
 
+import posthog from "posthog-js";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import {
@@ -43,20 +44,30 @@ export function Funnel() {
   }, []);
 
   const startQuiz = () => {
+    posthog.capture("quiz_started");
     setStage("quiz");
   };
 
   // Áudio preparatório toca no momento da virada diagnóstico → vídeo (clique do CTA do diagnóstico)
   const goToVideo = () => {
+    posthog.capture("diagnosis_cta_clicked", { arquetipo });
     playTransition();
     setStage("bridge");
   };
 
   const answer = (key: string) => {
-    setAnswers((prev) => [...prev, key]);
+    const newAnswers = [...answers, key];
+    const questionNumber = qIndex + 1;
+    posthog.capture("quiz_question_answered", {
+      question_number: questionNumber,
+      answer_key: key,
+    });
     if (qIndex < QUIZ_QUESTIONS.length - 1) {
+      setAnswers(newAnswers);
       setQIndex((i) => i + 1);
     } else {
+      posthog.capture("quiz_completed", { total_questions: QUIZ_QUESTIONS.length });
+      setAnswers(newAnswers);
       setStage("loading");
     }
   };
@@ -70,7 +81,7 @@ export function Funnel() {
         {stage === "diagnostico" && (
           <Diagnostico onNext={goToVideo} arquetipo={arquetipo} answers={answers} />
         )}
-        {stage === "bridge" && <Bridge onNext={() => setStage("vsl")} />}
+        {stage === "bridge" && <Bridge onNext={() => { posthog.capture("vsl_entered"); setStage("vsl"); }} />}
         {stage === "vsl" && <Vsl />}
       </div>
     </main>
