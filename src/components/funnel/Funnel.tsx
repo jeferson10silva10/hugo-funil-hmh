@@ -2,7 +2,17 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { Award, ArrowRight, Lock, Sparkles, ShieldCheck, Volume2, VolumeX, AlertTriangle } from "lucide-react";
+import {
+  Award, ArrowRight, Lock, Sparkles, ShieldCheck, Volume2, VolumeX, AlertTriangle,
+  Coins, TrendingDown, Sprout,
+  Ban, Waves, Timer,
+  RotateCcw, Split, Turtle,
+  Angry, Flame, Compass,
+  Weight, Brain, BatteryLow,
+  HeartHandshake, HeartCrack, User,
+  Copy, Undo2, Mountain,
+  type LucideIcon,
+} from "lucide-react";
 import { QUIZ_QUESTIONS } from "@/data/quiz";
 import { Vsl } from "./Vsl";
 
@@ -157,6 +167,17 @@ function Landing({ onStart }: { onStart: () => void }) {
   );
 }
 
+/* Ícones por pergunta × opção — semântica temática, mantém tom clínico */
+const QUIZ_ICONS: Record<number, [LucideIcon, LucideIcon, LucideIcon]> = {
+  1: [Coins, TrendingDown, Sprout],           // frases da infância sobre dinheiro
+  2: [Ban, Waves, Timer],                     // travar / dispersão / demora
+  3: [RotateCcw, Split, Turtle],              // abandona / termina uns / demora
+  4: [Angry, Flame, Compass],                 // rancor / inquietude / próprio ritmo
+  5: [Weight, Brain, BatteryLow],             // peso / inquietação mental / cansaço
+  6: [HeartHandshake, HeartCrack, User],      // largo pelo outro / culpa / eu (raro)
+  7: [Copy, Undo2, Mountain],                 // igual demais / puxava de volta / cresce
+};
+
 /* ---------------- Quiz ---------------- */
 function Quiz({ index, onAnswer }: { index: number; onAnswer: (k: string) => void }) {
   const q = QUIZ_QUESTIONS[index];
@@ -191,18 +212,21 @@ function Quiz({ index, onAnswer }: { index: number; onAnswer: (k: string) => voi
       </h2>
 
       <div className="mt-6 flex flex-col gap-3">
-        {q.options.map((opt) => (
-          <button
-            key={opt.key}
-            onClick={() => onAnswer(opt.key)}
-            className="group flex items-center gap-4 rounded-2xl border border-border/80 bg-card p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-navy/30 hover:shadow-card"
-          >
-            <span className="bg-navy-grad flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-base font-bold text-white shadow-card">
-              {opt.key}
-            </span>
-            <span className="text-[15px] leading-snug text-foreground">{opt.text}</span>
-          </button>
-        ))}
+        {q.options.map((opt, i) => {
+          const IconCmp = QUIZ_ICONS[q.id]?.[i];
+          return (
+            <button
+              key={opt.key}
+              onClick={() => onAnswer(opt.key)}
+              className="group flex items-center gap-4 rounded-2xl border border-border/80 bg-card p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-navy/30 hover:shadow-card"
+            >
+              <span className="bg-navy-grad flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white shadow-card">
+                {IconCmp ? <IconCmp className="h-[22px] w-[22px]" strokeWidth={1.9} /> : opt.key}
+              </span>
+              <span className="text-[15px] leading-snug text-foreground">{opt.text}</span>
+            </button>
+          );
+        })}
       </div>
     </section>
   );
