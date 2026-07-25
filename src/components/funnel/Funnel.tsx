@@ -8,23 +8,6 @@ import { Vsl } from "./Vsl";
 
 type Stage = "landing" | "quiz" | "loading" | "diagnostico" | "bridge" | "vsl";
 
-/* Monograma de marca — círculo foil com "H" serifado (substitui emojis de selo) */
-function Monogram({ size = 64 }: { size?: number }) {
-  return (
-    <span
-      className="bg-gold-foil inline-flex items-center justify-center rounded-full text-white shadow-gold"
-      style={{ width: size, height: size }}
-    >
-      <span
-        className="font-display font-semibold leading-none"
-        style={{ fontSize: size * 0.5 }}
-      >
-        H
-      </span>
-    </span>
-  );
-}
-
 export function Funnel() {
   const [stage, setStage] = useState<Stage>("landing");
   const [qIndex, setQIndex] = useState(0);
@@ -213,22 +196,25 @@ function Quiz({ index, onAnswer }: { index: number; onAnswer: (k: string) => voi
   );
 }
 
-/* ---------------- Loading ---------------- */
-const LOADING_STEPS = [
-  { at: 0, text: "Lendo suas respostas..." },
-  { at: 22, text: "Detectando padrão de auto-sabotagem..." },
-  { at: 48, text: "Cruzando com +10 mil casos atendidos..." },
-  { at: 72, text: "Identificando sua Herança Mental..." },
-  { at: 92, text: "Montando seu prontuário..." },
+/* ---------------- Loading + Respiração japonesa (Hara) ---------------- */
+// [rótulo, segundos, escala-alvo do círculo]
+const BREATH_PHASES: [string, number, number][] = [
+  ["Inspire", 4, 1],
+  ["Segure", 2, 1],
+  ["Solte", 4, 0.6],
+  ["Segure", 2, 0.6],
 ];
+const BREATH_TOTAL = 30; // segundos
 
 function Loading({ onDone }: { onDone: () => void }) {
   const [pct, setPct] = useState(0);
-  const step = [...LOADING_STEPS].reverse().find((s) => pct >= s.at) ?? LOADING_STEPS[0];
+  const [phase, setPhase] = useState(0);
+  const [count, setCount] = useState(BREATH_PHASES[0][1]);
 
+  // progresso total → conclui em 30s
   useEffect(() => {
     const start = performance.now();
-    const DURATION = 6500;
+    const DURATION = BREATH_TOTAL * 1000;
     let raf = 0;
     const tick = (now: number) => {
       const p = Math.min(100, Math.round(((now - start) / DURATION) * 100));
@@ -240,28 +226,70 @@ function Loading({ onDone }: { onDone: () => void }) {
     return () => cancelAnimationFrame(raf);
   }, [onDone]);
 
+  // motor das fases da respiração
+  useEffect(() => {
+    const secs = BREATH_PHASES[phase][1];
+    setCount(secs);
+    const adv = setTimeout(() => setPhase((p) => (p + 1) % BREATH_PHASES.length), secs * 1000);
+    const iv = setInterval(() => setCount((c) => (c > 1 ? c - 1 : c)), 1000);
+    return () => {
+      clearTimeout(adv);
+      clearInterval(iv);
+    };
+  }, [phase]);
+
+  const [label, secs, scale] = BREATH_PHASES[phase];
+  const left = Math.max(0, Math.ceil(((100 - pct) / 100) * BREATH_TOTAL));
+
   return (
-    <section className="bg-navy-grad shadow-elevated flex min-h-[70dvh] flex-col items-center justify-center rounded-3xl px-8 py-16 text-center">
-      <div className="relative">
-        <div className="absolute -inset-3 animate-ping rounded-full bg-gold/20" />
-        <Monogram size={76} />
+    <section className="bg-navy-grad shadow-elevated flex min-h-[80dvh] flex-col items-center justify-center rounded-3xl px-7 py-12 text-center">
+      <div className="overflow-hidden rounded-2xl border border-white/10">
+        <Image
+          src="/images/hms-logo.webp"
+          alt="Heranças da Mentalidade do Sucesso"
+          width={640}
+          height={640}
+          className="h-24 w-24 object-contain"
+          priority
+        />
       </div>
-      <h2 className="font-display mt-7 text-2xl font-semibold text-white">
-        Analisando suas respostas
+
+      <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.2em] text-gold">
+        Respiração do Hara · Técnica Japonesa
+      </p>
+      <h2 className="font-display mt-1 text-2xl font-semibold text-white">
+        Antes do seu diagnóstico, respire comigo
       </h2>
-      <p className="mt-2 min-h-[1.5rem] text-[15px] font-medium text-gold transition-opacity">
-        {step.text}
+      <p className="mx-auto mt-2 max-w-xs text-[14px] leading-relaxed text-white/70">
+        O Hugo usa essa respiração pra acalmar a mente e preparar você pra receber o resultado.
+        Só siga o círculo.
       </p>
 
-      <div className="mt-7 h-2 w-full max-w-xs overflow-hidden rounded-full bg-white/12">
+      {/* Círculo de respiração */}
+      <div className="relative mt-5 flex h-[186px] w-[186px] items-center justify-center">
+        <div className="hm-pulse absolute inset-0 rounded-full border border-dashed border-gold/30" />
+        <div
+          className="bg-gold-foil flex h-28 w-28 items-center justify-center rounded-full text-[#1a2440] shadow-gold"
+          style={{ transform: `scale(${scale})`, transition: `transform ${secs}s ease-in-out` }}
+        >
+          <div>
+            <span className="block text-[13px] font-bold uppercase tracking-wide">{label}</span>
+            <b className="text-3xl font-extrabold leading-none">{count}</b>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-6 h-2 w-full max-w-xs overflow-hidden rounded-full bg-white/12">
         <div
           className="bg-gold-foil h-full rounded-full transition-[width] duration-150"
           style={{ width: `${pct}%` }}
         />
       </div>
-      <p className="mt-3 text-sm font-semibold tabular-nums text-white/90">{pct}% concluído</p>
+      <p className="mt-2 text-sm font-semibold tabular-nums text-white/85">
+        {left > 0 ? `Seu prontuário em ${left}s` : "Pronto!"}
+      </p>
 
-      <p className="mt-7 flex items-center gap-1.5 text-xs text-white/60">
+      <p className="mt-4 flex items-center gap-1.5 text-xs text-white/55">
         <Lock className="h-3.5 w-3.5" /> Suas respostas são completamente confidenciais
       </p>
     </section>
@@ -403,10 +431,23 @@ function Diagnostico({ onNext }: { onNext: () => void }) {
 
 /* ---------------- Bridge ---------------- */
 function Bridge({ onNext }: { onNext: () => void }) {
+  const [left, setLeft] = useState(15);
+  useEffect(() => {
+    const iv = setInterval(() => setLeft((l) => (l > 0 ? l - 1 : 0)), 1000);
+    return () => clearInterval(iv);
+  }, []);
+  const ready = left <= 0;
+
   return (
     <section className="shadow-elevated ring-hairline rounded-3xl bg-card p-7">
       <div className="flex justify-center">
-        <Monogram size={56} />
+        <Image
+          src="/images/hms-emblem.webp"
+          alt="Heranças da Mentalidade do Sucesso"
+          width={240}
+          height={240}
+          className="h-16 w-16 rounded-full ring-1 ring-gold/30"
+        />
       </div>
       <div className="mt-6 space-y-4 text-[17px] leading-relaxed text-foreground/85">
         <p>Você acabou de descobrir o nome da força invisível que vem te travando.</p>
@@ -426,7 +467,18 @@ function Bridge({ onNext }: { onNext: () => void }) {
       </div>
 
       <div className="mt-7">
-        <PrimaryButton onClick={onNext}>Assistir ao vídeo</PrimaryButton>
+        {ready ? (
+          <div className="hm-fade-up">
+            <PrimaryButton onClick={onNext}>Assistir ao vídeo</PrimaryButton>
+          </div>
+        ) : (
+          <button
+            disabled
+            className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-2xl bg-secondary px-7 py-4 text-base font-semibold uppercase tracking-wide text-muted-foreground"
+          >
+            <Lock className="h-4 w-4" /> Liberando o vídeo em {left}s
+          </button>
+        )}
       </div>
     </section>
   );
