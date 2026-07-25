@@ -273,11 +273,16 @@ function Loading({ onDone }: { onDone: () => void }) {
     <section className="bg-navy-grad shadow-elevated flex min-h-[80dvh] flex-col items-center justify-between overflow-hidden rounded-3xl px-6 py-8 text-center">
       <div className="flex w-full flex-col items-center">
         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gold">
-          Respiração do Hara · Técnica Japonesa
+          Respiração do Hara · Técnica dos Monges Zen
         </p>
         <h2 className="font-display mt-1 text-xl font-semibold text-white">
-          Antes do seu diagnóstico, respire comigo
+          Respire comigo antes de ver seu diagnóstico
         </h2>
+        <p className="mx-auto mt-2 max-w-[300px] text-[13px] leading-snug text-white/75">
+          Mesma respiração que os monges zen usam há <strong className="text-white">800 anos</strong>{" "}
+          pra <strong className="text-gold">cortar o cortisol e destravar a mente</strong> —
+          comprovada por Harvard. É o ritual que o Hugo faz antes de cada atendimento.
+        </p>
       </div>
 
       {/* Vídeo guiado — autoplay mudo, botão de som */}
