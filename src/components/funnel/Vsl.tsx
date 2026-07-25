@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import confetti from "canvas-confetti";
 import {
   Award,
   ArrowRight,
@@ -17,6 +18,24 @@ import {
   Clock,
 } from "lucide-react";
 import { PANDA_VSL_SRC, CHECKOUT_IMERSAO } from "@/data/quiz";
+
+/* ⌛ Liberação por tempo (em segundos) — a página abre com presentes/oferta bloqueados */
+const T_GIFT_1 = 60;        // 1 min → libera Presente 1 + confete pequeno
+const T_OFFER  = 60 * 7;    // 7 min → libera Presente 2 + toda a oferta + confete grande
+
+/* Confete dourado (paleta do funil) */
+function fireConfetti(intensity: "small" | "big" = "small") {
+  const colors = ["#d9a94a", "#bd8728", "#9a6c1e", "#faf6ec"];
+  const count = intensity === "big" ? 220 : 90;
+  const defaults = { origin: { y: 0.35 }, colors };
+  confetti({ ...defaults, particleCount: Math.round(count * 0.55), spread: 70, startVelocity: 45 });
+  confetti({ ...defaults, particleCount: Math.round(count * 0.35), spread: 100, startVelocity: 55, scalar: 0.9 });
+  if (intensity === "big") {
+    setTimeout(() => confetti({ ...defaults, particleCount: 120, spread: 130, startVelocity: 60, origin: { y: 0.2 } }), 220);
+    setTimeout(() => confetti({ ...defaults, particleCount: 80, spread: 160, startVelocity: 40, origin: { x: 0.2, y: 0.4 } }), 420);
+    setTimeout(() => confetti({ ...defaults, particleCount: 80, spread: 160, startVelocity: 40, origin: { x: 0.8, y: 0.4 } }), 520);
+  }
+}
 
 /* CTA verde da oferta */
 function GreenCTA({ children }: { children: React.ReactNode }) {
@@ -110,18 +129,36 @@ const COMPARISON: [string, string][] = [
 ];
 
 export function Vsl() {
+  const [gift1, setGift1] = useState(false);
+  const [offerOpen, setOfferOpen] = useState(false);
+  const firedRef = useRef({ g1: false, off: false });
+
+  useEffect(() => {
+    const t1 = setTimeout(() => {
+      setGift1(true);
+      if (!firedRef.current.g1) { firedRef.current.g1 = true; fireConfetti("small"); }
+    }, T_GIFT_1 * 1000);
+    const t2 = setTimeout(() => {
+      setOfferOpen(true);
+      if (!firedRef.current.off) { firedRef.current.off = true; fireConfetti("big"); }
+    }, T_OFFER * 1000);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, []);
+
   return (
     <section className="shadow-elevated ring-hairline rounded-3xl bg-card p-6">
-      {/* Header */}
-      <div className="text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-gold">
-          Protocolo de Remoção
-        </p>
-        <h1 className="font-display mt-1 text-[2rem] font-semibold leading-tight tracking-tight text-foreground">
-          Heranças Mentais Herdadas
-        </h1>
-        <p className="mt-1 inline-flex items-center gap-1.5 text-sm text-muted-foreground">
-          <Award className="h-4 w-4 text-gold" /> Mestre da Medicina Oriental · Premiado ONU
+      {/* Header — logo HMS (autoridade) */}
+      <div className="flex flex-col items-center">
+        <Image
+          src="/images/hms-logo-h.webp"
+          alt="Heranças da Mentalidade do Sucesso"
+          width={820}
+          height={82}
+          className="h-auto w-full max-w-[340px]"
+          priority
+        />
+        <p className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-gold">
+          <Award className="h-3.5 w-3.5" /> Protocolo de Remoção · Premiado ONU
         </p>
       </div>
 
@@ -138,34 +175,74 @@ export function Vsl() {
         </div>
       </div>
 
-      {/* Presentes */}
+      {/* Presentes — liberação por tempo com confete */}
       <div className="mt-6 rounded-3xl border border-gold/30 bg-gold/5 p-4">
         <p className="flex items-center gap-2 text-lg font-semibold text-foreground">
-          <Gift className="h-5 w-5 text-gold" /> Presentes Liberados ao Assistir
+          <Gift className="h-5 w-5 text-gold" /> Presentes que você ganha assistindo
+        </p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Ao comprar a Imersão hoje, você leva os <strong className="text-foreground">2 treinamentos</strong> abaixo — desbloqueados ao vivo pra você.
         </p>
         <div className="mt-3 space-y-3">
-          {GIFTS.map((g) => (
-            <div
-              key={g.title}
-              className="flex gap-3 rounded-2xl border border-gold/25 bg-cream p-4 shadow-card"
-            >
-              <CheckCircle2 className="mt-0.5 h-6 w-6 shrink-0 text-[#1d8755]" />
-              <div>
-                <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.1em] text-gold">
-                  <Gift className="h-3.5 w-3.5" /> Presente Liberado
-                </p>
-                <p className="mt-1 font-semibold leading-snug text-foreground">{g.title}</p>
-                <p className="mt-0.5 text-sm text-muted-foreground">
-                  Valor {g.value} — É seu de graça
-                </p>
+          {GIFTS.map((g, i) => {
+            const unlocked = i === 0 ? gift1 : offerOpen;
+            if (unlocked) {
+              return (
+                <div
+                  key={g.title}
+                  className="hm-fade-up flex gap-3 rounded-2xl border border-gold/25 bg-cream p-4 shadow-card"
+                >
+                  <CheckCircle2 className="mt-0.5 h-6 w-6 shrink-0 text-[#1d8755]" />
+                  <div>
+                    <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.1em] text-gold">
+                      <Gift className="h-3.5 w-3.5" /> Presente Liberado
+                    </p>
+                    <p className="mt-1 font-semibold leading-snug text-foreground">{g.title}</p>
+                    <p className="mt-0.5 text-sm text-muted-foreground">
+                      Valor {g.value} — É seu de graça
+                    </p>
+                  </div>
+                </div>
+              );
+            }
+            return (
+              <div
+                key={g.title}
+                className="flex gap-3 rounded-2xl border border-dashed border-muted-foreground/25 bg-secondary/40 p-4"
+              >
+                <Lock className="mt-0.5 h-6 w-6 shrink-0 text-muted-foreground/70" />
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground">
+                    Presente {i + 1}: bloqueado
+                  </p>
+                  <p className="mt-1 font-semibold leading-snug text-muted-foreground">
+                    Continue assistindo para revelar…
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
+      {/* ⌛ Placeholder quando a oferta ainda está bloqueada */}
+      {!offerOpen && (
+        <div className="mt-6 flex flex-col items-center rounded-3xl border border-dashed border-gold/30 bg-secondary/40 p-6 text-center">
+          <Lock className="h-6 w-6 text-gold/70" />
+          <p className="font-display mt-2 text-lg font-semibold text-foreground">
+            Assista o vídeo até o final
+          </p>
+          <p className="mx-auto mt-1 max-w-xs text-sm text-muted-foreground">
+            Quando o Hugo terminar a explicação, sua condição especial (Imersão + os 2 bônus) será
+            liberada aqui embaixo — automaticamente.
+          </p>
+        </div>
+      )}
+
+      {offerOpen && (
+      <>
       {/* Antes & Depois */}
-      <div className="mt-8 text-center">
+      <div className="hm-fade-up mt-8 text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-gold">
           Antes &amp; Depois
         </p>
@@ -357,6 +434,8 @@ export function Vsl() {
           <Lock className="h-3.5 w-3.5" /> Pagamento 100% seguro via Hotmart · Garantia de 30 dias
         </p>
       </div>
+      </>
+      )}
     </section>
   );
 }
