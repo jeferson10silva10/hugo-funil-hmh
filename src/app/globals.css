@@ -1,0 +1,191 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter), "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, monospace;
+  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
+  --font-heading: var(--font-display);
+  --color-navy: var(--navy);
+  --color-navy-deep: var(--navy-deep);
+  --color-gold: var(--gold);
+  --color-success: var(--success);
+  --color-cream: var(--cream);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  /* Brand tokens — valores exatos capturados de hugomiyazakioriental.org */
+  --navy: #113574;         /* botões / marca (rgb 17,53,116) */
+  --navy-deep: #25316d;    /* fundo loading / telas escuras */
+  --gold: #bd8728;         /* acento dourado (rgb 189,135,40) */
+  --success: #1d8755;      /* CTA verde da oferta (rgb 29,135,85) */
+  --cream: #faf6ec;        /* fundo dos cards de presente/bônus */
+
+  --background: #fcfcfd;              /* rgb 252,252,253 */
+  --foreground: #151c28;             /* rgb 21,28,40 */
+  --card: #ffffff;
+  --card-foreground: #151c28;
+  --popover: #ffffff;
+  --popover-foreground: #151c28;
+  --primary: #113574;                /* navy */
+  --primary-foreground: #ffffff;
+  --secondary: #f3f4f7;
+  --secondary-foreground: #151c28;
+  --muted: #f3f4f7;
+  --muted-foreground: #5b6472;
+  --accent: #bd8728;                 /* gold */
+  --accent-foreground: #ffffff;
+  --destructive: #b91c1c;            /* vermelho "severo" */
+  --border: #e6e8ee;
+  --input: #e6e8ee;
+  --ring: #113574;
+  --chart-1: #113574;
+  --chart-2: #bd8728;
+  --chart-3: #25316d;
+  --chart-4: #b91c1c;
+  --chart-5: #5b6472;
+  --radius: 0.84rem;                 /* ~13.5px */
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    /* Textura sutil de fundo — tira o "flat" de IA */
+    background-image:
+      radial-gradient(1200px 600px at 50% -10%, rgba(17, 53, 116, 0.05), transparent 60%),
+      radial-gradient(800px 400px at 100% 100%, rgba(189, 135, 40, 0.04), transparent 60%);
+    background-attachment: fixed;
+  }
+  html {
+    @apply font-sans;
+  }
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.015em;
+  }
+}
+
+@layer utilities {
+  /* Dourado com acabamento foil (não chapado) */
+  .text-gold-foil {
+    background: linear-gradient(135deg, #d9a94a 0%, #bd8728 45%, #9a6c1e 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .bg-gold-foil {
+    background: linear-gradient(135deg, #d9a94a 0%, #bd8728 55%, #a9781f 100%);
+  }
+  .bg-navy-grad {
+    background: radial-gradient(120% 120% at 50% 0%, #2b3f7a 0%, #17306a 55%, #101f47 100%);
+  }
+  /* Sombras em camadas — profundidade real */
+  .shadow-card {
+    box-shadow:
+      0 1px 2px rgba(16, 24, 40, 0.04),
+      0 8px 24px -8px rgba(16, 24, 40, 0.12);
+  }
+  .shadow-elevated {
+    box-shadow:
+      0 1px 2px rgba(16, 24, 40, 0.05),
+      0 12px 32px -8px rgba(17, 53, 116, 0.18),
+      0 2px 8px -4px rgba(16, 24, 40, 0.1);
+  }
+  .shadow-gold {
+    box-shadow:
+      0 0 0 1px rgba(189, 135, 40, 0.35),
+      0 12px 40px -12px rgba(189, 135, 40, 0.4);
+  }
+  /* Borda-hairline com brilho interno (premium) */
+  .ring-hairline {
+    box-shadow:
+      inset 0 0 0 1px rgba(16, 24, 40, 0.06),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.6);
+  }
+}
