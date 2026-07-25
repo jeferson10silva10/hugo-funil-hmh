@@ -13,7 +13,7 @@ import {
   Copy, Undo2, Mountain,
   type LucideIcon,
 } from "lucide-react";
-import { QUIZ_QUESTIONS } from "@/data/quiz";
+import { QUIZ_QUESTIONS, PERFIS, calcularArquetipo, citarResposta, type Arquetipo } from "@/data/quiz";
 import { Vsl } from "./Vsl";
 
 type Stage = "landing" | "quiz" | "loading" | "diagnostico" | "bridge" | "vsl";
@@ -21,7 +21,10 @@ type Stage = "landing" | "quiz" | "loading" | "diagnostico" | "bridge" | "vsl";
 export function Funnel() {
   const [stage, setStage] = useState<Stage>("landing");
   const [qIndex, setQIndex] = useState(0);
-  const [, setAnswers] = useState<string[]>([]);
+  const [answers, setAnswers] = useState<string[]>([]);
+  const arquetipo: Arquetipo = answers.length >= QUIZ_QUESTIONS.length
+    ? calcularArquetipo(answers)
+    : "aprisionada"; // fallback antes do quiz terminar
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const playTransition = useCallback(() => {
@@ -64,7 +67,9 @@ export function Funnel() {
         {stage === "landing" && <Landing onStart={startQuiz} />}
         {stage === "quiz" && <Quiz index={qIndex} onAnswer={answer} />}
         {stage === "loading" && <Loading onDone={() => setStage("diagnostico")} />}
-        {stage === "diagnostico" && <Diagnostico onNext={goToVideo} />}
+        {stage === "diagnostico" && (
+          <Diagnostico onNext={goToVideo} arquetipo={arquetipo} answers={answers} />
+        )}
         {stage === "bridge" && <Bridge onNext={() => setStage("vsl")} />}
         {stage === "vsl" && <Vsl />}
       </div>
@@ -134,16 +139,16 @@ function Landing({ onStart }: { onStart: () => void }) {
       </div>
 
       <p className="mt-6 text-center text-[13px] font-semibold uppercase tracking-[0.14em] text-gold">
-        Não é preguiça. Não é falta de disciplina.
+        Você trabalha muito e o mundo não te devolve?
       </p>
       <h1 className="font-display mt-2 text-center text-[2rem] font-semibold leading-[1.08] tracking-tight text-foreground">
         Você jurou que <span className="text-gold-foil">2026</span> seria diferente. Eai?
       </h1>
 
       <p className="mx-auto mt-3 max-w-sm text-center text-[15px] leading-relaxed text-muted-foreground">
-        Metade do ano já passou e tá tudo igual a 2025. Existe uma Herança que
-        instalaram na sua mente antes dos 7 anos — descubra qual está te sabotando,
-        em 7 perguntas.
+        Não é falta de esforço. Existe uma <strong className="text-foreground">Herança
+        Mental Herdada</strong> que instalaram na sua mente antes dos 7 anos — descubra
+        qual está travando você, em 7 perguntas.
       </p>
 
       <div className="mt-7">
@@ -340,9 +345,21 @@ function HugoProof() {
   );
 }
 
-/* ---------------- Diagnóstico ---------------- */
-function Diagnostico({ onNext }: { onNext: () => void }) {
+/* ---------------- Diagnóstico (adaptativo por arquétipo) ---------------- */
+function Diagnostico({
+  onNext,
+  arquetipo,
+  answers,
+}: {
+  onNext: () => void;
+  arquetipo: Arquetipo;
+  answers: string[];
+}) {
   const date = new Date().toLocaleDateString("pt-BR");
+  const perfil = PERFIS[arquetipo];
+  // Prova personalizada: cita a resposta da pergunta de auto-sacrifício (q6) — a corda mais forte da VSL
+  const citaAutoSacrificio = citarResposta(answers, 6);
+  const isSevero = perfil.severidadeCor === "vermelho";
   return (
     <section className="shadow-elevated ring-hairline overflow-hidden rounded-3xl bg-card">
       <div className="border-b border-border px-7 py-4">
@@ -375,10 +392,16 @@ function Diagnostico({ onNext }: { onNext: () => void }) {
           Tipo de Herança Identificada
         </p>
         <h1 className="font-display text-[2rem] font-semibold leading-tight tracking-tight text-foreground">
-          Mente Aprisionada
+          {perfil.nomeCurto}
         </h1>
-        <p className="mt-1.5 inline-flex items-center gap-1.5 rounded-full bg-destructive/10 px-3 py-1 text-sm font-semibold text-destructive">
-          <Lock className="h-3.5 w-3.5" /> Diagnóstico Severo
+        <p
+          className={`mt-1.5 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold ${
+            isSevero
+              ? "bg-destructive/10 text-destructive"
+              : "bg-[#c2680f]/10 text-[#c2680f]"
+          }`}
+        >
+          <Lock className="h-3.5 w-3.5" /> Diagnóstico {isSevero ? "Severo" : "Moderado"}
         </p>
 
         <p className="mt-5 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
@@ -387,15 +410,28 @@ function Diagnostico({ onNext }: { onNext: () => void }) {
         <div className="mt-2 flex items-center gap-3">
           <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-secondary">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-destructive/70 to-destructive"
-              style={{ width: "87%" }}
+              className={`h-full rounded-full ${
+                isSevero
+                  ? "bg-gradient-to-r from-destructive/70 to-destructive"
+                  : "bg-gradient-to-r from-[#e29638]/70 to-[#c2680f]"
+              }`}
+              style={{ width: `${perfil.grau}%` }}
             />
           </div>
-          <span className="font-display text-2xl font-semibold text-destructive">87%</span>
+          <span
+            className={`font-display text-2xl font-semibold ${
+              isSevero ? "text-destructive" : "text-[#c2680f]"
+            }`}
+          >
+            {perfil.grau}%
+          </span>
         </div>
         <p className="mt-1.5 text-sm text-muted-foreground">
-          Mais alto que <strong className="text-foreground">8 em cada 10</strong> pessoas que
-          fizeram este teste.
+          Mais alto que{" "}
+          <strong className="text-foreground">
+            {perfil.grau >= 85 ? "8 em cada 10" : perfil.grau >= 70 ? "7 em cada 10" : "6 em cada 10"}
+          </strong>{" "}
+          pessoas que fizeram este teste.
         </p>
 
         <div className="my-6 h-px bg-border" />
@@ -404,26 +440,31 @@ function Diagnostico({ onNext }: { onNext: () => void }) {
           Diagnóstico Completo
         </p>
         <h2 className="font-display mt-1 text-xl font-semibold text-foreground">
-          Sua Herança Mental está em ESTADO SEVERO
+          Sua Herança Mental está em {perfil.severidade}
         </h2>
 
         <div className="mt-3 space-y-3 text-[15px] leading-relaxed text-foreground/85">
-          <p>Você não tem um problema de disciplina.</p>
-          <p>Você não tem um problema de motivação.</p>
-          <p>
-            Você tem uma Herança Mental Herdada de Aprisionamento. Uma programação que foi
-            instalada em você nos primeiros 7 anos de vida.
-          </p>
-          <p>Ela está rodando há décadas em segundo plano. Sabotando toda decisão que você toma.</p>
-          <p>
-            A cada vez que você tenta crescer, ela ativa. A cada vez que você decide mudar, ela
-            contra-ataca.
-          </p>
-          <p>
-            Sozinho, você não vai sair daí. Não porque você é fraco. Porque a Herança foi feita
-            pra ser invisível.
-          </p>
+          {perfil.frasesDor.map((f, i) => (
+            <p key={i}>{f}</p>
+          ))}
         </div>
+
+        {/* Prova personalizada — cita a resposta da pessoa (auto-sacrifício) */}
+        {citaAutoSacrificio && (
+          <div className="hm-fade-up mt-5 rounded-2xl border-l-4 border-navy bg-navy/5 p-4">
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-navy">
+              A sua resposta prova isso
+            </p>
+            <p className="mt-1.5 text-[15px] leading-relaxed text-foreground/90">
+              Você marcou:{" "}
+              <em className="font-semibold text-foreground">
+                &ldquo;{citaAutoSacrificio}&rdquo;
+              </em>
+              . Esse é exatamente o padrão nº 1 de quem tem a sua Herança ativa — e é a raiz do
+              porquê você trabalha, trabalha, trabalha e não sai do lugar.
+            </p>
+          </div>
+        )}
 
         <div className="hm-glow-red mt-5 flex gap-3 rounded-2xl border-l-4 border-destructive bg-destructive/8 p-4">
           <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
@@ -432,19 +473,22 @@ function Diagnostico({ onNext }: { onNext: () => void }) {
               ⚠ Prognóstico sem intervenção
             </p>
             <p className="mt-1.5 text-[15px] leading-relaxed text-foreground/90">
-              Se você não remover essa Herança nos <strong className="text-destructive">próximos 6 meses</strong>, 2026 vai ser igual a 2025. Que foi igual a 2024. <strong className="text-foreground">E você sabe disso.</strong>
+              {perfil.prognostico}
             </p>
           </div>
         </div>
 
         <div className="mt-5 flex gap-3 rounded-2xl border border-gold/30 bg-gold/8 p-4">
           <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-gold" />
-          <p className="text-[15px] leading-relaxed text-foreground/85">
-            Mas escuta: <strong className="text-foreground">isso não é culpa sua.</strong> Você
-            não escolheu essa programação — ela foi instalada quando você era criança, sem você
-            perceber. E é <strong className="text-foreground">exatamente por isso que dá pra
-            remover.</strong> Não sozinho — comigo do seu lado, no próximo vídeo.
+          <p className="text-[15px] leading-relaxed text-foreground/85">{perfil.reframe}</p>
+        </div>
+
+        {/* Ishin-Denshin — autoridade cultural japonesa (Medicina Oriental) */}
+        <div className="mt-5 rounded-2xl border border-gold/40 bg-navy-grad p-5 text-white">
+          <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-gold">
+            🇯🇵 Medicina Oriental Japonesa
           </p>
+          <p className="mt-2 text-[15px] leading-relaxed text-white/90">{perfil.ganchoJapones}</p>
         </div>
 
         <div className="mt-6 border-t border-border pt-5">
