@@ -189,3 +189,43 @@
       inset 0 1px 0 0 rgba(255, 255, 255, 0.6);
   }
 }
+
+/* ============ Motion premium ============ */
+@keyframes hmFadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes hmGlow {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(189,135,40,.4), 0 14px 44px -14px rgba(189,135,40,.4); }
+  50% { box-shadow: 0 0 0 1px rgba(189,135,40,.75), 0 18px 60px -10px rgba(189,135,40,.7); }
+}
+@keyframes hmShine {
+  0% { transform: translateX(-130%) skewX(-18deg); }
+  60%, 100% { transform: translateX(240%) skewX(-18deg); }
+}
+@keyframes hmPulseRing {
+  0%, 100% { opacity: .55; }
+  50% { opacity: 1; }
+}
+
+.hm-fade-up { animation: hmFadeUp .7s cubic-bezier(0.22,1,0.36,1) both; }
+.hm-glow { animation: hmGlow 3s ease-in-out infinite; }
+.hm-pulse { animation: hmPulseRing 2.4s ease-in-out infinite; }
+
+/* Brilho que passa por cima (preço, CTA, selos) */
+.hm-shine { position: relative; overflow: hidden; }
+.hm-shine::after {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0; left: 0;
+  width: 45%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,.45), transparent);
+  transform: translateX(-130%) skewX(-18deg);
+  animation: hmShine 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hm-fade-up, .hm-glow, .hm-pulse { animation: none; }
+  .hm-shine::after { display: none; }
+}

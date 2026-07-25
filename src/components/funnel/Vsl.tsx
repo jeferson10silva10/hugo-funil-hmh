@@ -13,6 +13,7 @@ import {
   Sparkles,
   ShieldCheck,
   Medal,
+  Crown,
   Clock,
 } from "lucide-react";
 import { PANDA_VSL_SRC, CHECKOUT_IMERSAO } from "@/data/quiz";
@@ -22,7 +23,7 @@ function GreenCTA({ children }: { children: React.ReactNode }) {
   return (
     <a
       href={CHECKOUT_IMERSAO}
-      className="group flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-b from-[#25a06a] to-[#1a7d4e] px-7 py-4 text-base font-semibold uppercase tracking-wide text-white shadow-elevated transition-transform duration-200 active:scale-[0.985]"
+      className="hm-shine group flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-b from-[#25a06a] to-[#1a7d4e] px-7 py-4 text-base font-semibold uppercase tracking-wide text-white shadow-elevated transition-transform duration-200 hover:brightness-110 active:scale-[0.985]"
     >
       {children}
       <ArrowRight className="h-5 w-5 transition-transform duration-200 group-hover:translate-x-1" />
@@ -30,20 +31,24 @@ function GreenCTA({ children }: { children: React.ReactNode }) {
   );
 }
 
-/* Countdown evergreen (reproduz o comportamento do original) */
+/* Countdown REAL até a Imersão (01/08/2026 09:30, horário de Brasília) */
+const IMERSAO_TARGET = new Date("2026-08-01T09:30:00-03:00").getTime();
+
 function Countdown() {
-  const START = 2 * 86400 + 23 * 3600 + 59 * 60 + 55;
-  const [secs, setSecs] = useState(START);
+  const [secs, setSecs] = useState<number | null>(null);
 
   useEffect(() => {
-    const id = setInterval(() => setSecs((s) => (s > 0 ? s - 1 : 0)), 1000);
+    const tick = () => setSecs(Math.max(0, Math.floor((IMERSAO_TARGET - Date.now()) / 1000)));
+    tick();
+    const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, []);
 
-  const d = Math.floor(secs / 86400);
-  const h = Math.floor((secs % 86400) / 3600);
-  const m = Math.floor((secs % 3600) / 60);
-  const s = secs % 60;
+  const total = secs ?? 0;
+  const d = Math.floor(total / 86400);
+  const h = Math.floor((total % 86400) / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
   const pad = (n: number) => String(n).padStart(2, "0");
   const units: [string, number][] = [
     ["DIAS", d],
@@ -53,26 +58,26 @@ function Countdown() {
   ];
 
   return (
-    <div className="bg-navy-grad mt-6 rounded-3xl px-5 py-6 text-center text-white shadow-elevated">
+    <div className="hm-glow bg-navy-grad mt-6 overflow-hidden rounded-3xl border border-gold/40 px-5 py-6 text-center text-white">
       <p className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.22em] text-gold">
         <Clock className="h-4 w-4" /> Tempo Restante
       </p>
       <p className="font-display mt-2 text-2xl font-semibold">A Imersão começa em:</p>
-      <div className="mt-4 flex items-stretch justify-center gap-2">
+      <div className="mt-4 flex items-stretch justify-center gap-1.5">
         {units.map(([label, value], i) => (
-          <div key={label} className="flex items-center gap-2">
-            <div className="ring-hairline flex min-w-[64px] flex-col rounded-2xl bg-white/10 px-2 py-2.5">
-              <span className="text-3xl font-bold tabular-nums">{pad(value)}</span>
-              <span className="mt-0.5 text-[10px] font-semibold tracking-[0.12em] text-white/60">
+          <div key={label} className="flex items-center gap-1.5">
+            <div className="flex min-w-[62px] flex-col rounded-2xl border border-white/15 bg-white/8 px-2 py-2.5 shadow-inner">
+              <span className="text-3xl font-bold tabular-nums text-gold">{pad(value)}</span>
+              <span className="mt-0.5 text-[10px] font-semibold tracking-[0.12em] text-white/55">
                 {label}
               </span>
             </div>
-            {i < units.length - 1 && <span className="text-2xl font-bold text-gold">:</span>}
+            {i < units.length - 1 && <span className="text-2xl font-bold text-gold/70">:</span>}
           </div>
         ))}
       </div>
-      <p className="mt-4 text-[15px] leading-relaxed text-white/85">
-        Sábado 18/07 das 9:30 às 17h + Domingo 19/07 das 15h às 18h
+      <p className="mt-4 text-[15px] font-medium leading-relaxed text-white/90">
+        Sábado 01/08 · 9h30 às 17h30 &nbsp;+&nbsp; Domingo 02/08 · 15h às 18h
       </p>
     </div>
   );
@@ -84,7 +89,7 @@ const GIFTS = [
 ];
 
 const LOTE1_ITEMS = [
-  { bold: "2 sessões AO VIVO", rest: " — Sábado 18/07 das 9:30 às 17h + Domingo 19/07 das 15h às 18h" },
+  { bold: "2 sessões AO VIVO", rest: " — Sábado 01/08 (9h30–17h30) + Domingo 02/08 (15h–18h)" },
   { bold: "", rest: "Bônus 1: Treinamento Heranças da Mentalidade de Sucesso" },
   { bold: "Bônus 2:", rest: " Katsu Desafio — Resultado em 5 Dias (gravado no Hotmart)" },
   { bold: "", rest: "Grupo VIP no WhatsApp" },
@@ -205,18 +210,7 @@ export function Vsl() {
         </div>
       </div>
 
-      {/* Banner Imersão */}
-      <div className="mt-6 overflow-hidden rounded-2xl shadow-card">
-        <Image
-          src="https://hugomiyazakioriental.org/__l5e/assets-v1/14e58dec-8f00-496f-8597-c983aaffe9b9/imersao-julho.webp"
-          alt="Imersão Herança da Mentalidade de Sucesso — 18 e 19 de Julho de 2026"
-          width={700}
-          height={700}
-          className="h-auto w-full"
-        />
-      </div>
-
-      <div className="mt-6 text-center">
+      <div className="mt-8 text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-gold">
           A Oferta Completa
         </p>
@@ -253,34 +247,44 @@ export function Vsl() {
 
       <Countdown />
 
-      {/* 1º Lote */}
-      <div className="shadow-gold mt-6 rounded-3xl border-2 border-gold/60 bg-card p-6 text-center">
-        <span className="bg-gold-foil inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-bold text-white">
-          <Medal className="h-4 w-4" /> 1º LOTE — PRÓXIMA TURMA
-        </span>
-        <p className="text-gold-foil font-display mt-3 text-5xl font-bold">R$ 77</p>
-        <p className="mt-1 text-sm font-semibold uppercase tracking-wide text-navy">
-          Próxima Turma — Vagas Limitadas
-        </p>
+      {/* 1º Lote — card premium escuro */}
+      <div className="hm-glow hm-fade-up bg-gold-foil mt-6 rounded-3xl p-[2px]">
+        <div className="bg-navy-grad relative overflow-hidden rounded-[calc(1.85rem-2px)] px-6 pb-6 pt-6 text-center text-white">
+          <div className="flex items-center justify-between gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-gold">
+              <Medal className="h-3.5 w-3.5" /> 1º Lote
+            </span>
+            <span className="hm-pulse inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-gold">
+              <Crown className="h-3.5 w-3.5" /> Melhor custo-benefício
+            </span>
+          </div>
 
-        <ul className="mt-5 space-y-3 text-left">
-          {LOTE1_ITEMS.map((item, i) => (
-            <li key={i} className="flex gap-3 text-[15px] leading-snug text-foreground/85">
-              <Check className="mt-0.5 h-5 w-5 shrink-0 text-[#1d8755]" strokeWidth={2.5} />
-              <span>
-                {item.bold && <strong className="text-foreground">{item.bold}</strong>}
-                {item.rest}
-              </span>
-            </li>
-          ))}
-        </ul>
+          <p className="hm-shine text-gold-foil font-display mt-3 inline-block text-6xl font-bold leading-none">
+            R$ 77
+          </p>
+          <p className="mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-gold">
+            Próxima Turma · Vagas Limitadas
+          </p>
 
-        <div className="mt-6">
-          <GreenCTA>Quero minha vaga agora</GreenCTA>
+          <ul className="mt-5 space-y-3 text-left">
+            {LOTE1_ITEMS.map((item, i) => (
+              <li key={i} className="flex gap-3 text-[15px] leading-snug text-white/85">
+                <Check className="mt-0.5 h-5 w-5 shrink-0 text-[#3ecf8e]" strokeWidth={2.5} />
+                <span>
+                  {item.bold && <strong className="text-white">{item.bold}</strong>}
+                  {item.rest}
+                </span>
+              </li>
+            ))}
+          </ul>
+
+          <div className="mt-6">
+            <GreenCTA>Quero minha vaga agora</GreenCTA>
+          </div>
+          <p className="mt-3 flex items-center justify-center gap-1.5 text-sm text-white/60">
+            <Lock className="h-3.5 w-3.5" /> Pagamento 100% seguro via Hotmart
+          </p>
         </div>
-        <p className="mt-3 flex items-center justify-center gap-1.5 text-sm text-muted-foreground">
-          <Lock className="h-3.5 w-3.5" /> Pagamento 100% seguro via Hotmart
-        </p>
       </div>
 
       {/* 2º Lote */}
