@@ -100,12 +100,17 @@ function PrimaryButton({
 function Landing({ onStart }: { onStart: () => void }) {
   return (
     <section className="shadow-elevated ring-hairline rounded-3xl bg-card p-7">
-      <div className="mx-auto flex w-fit items-center gap-2 rounded-full border border-gold/25 bg-gold/8 px-4 py-2">
-        <Award className="h-4 w-4 text-gold" strokeWidth={2.2} />
-        <span className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">
-          Diagnóstico Oriental HMH
-        </span>
-      </div>
+      <Image
+        src="/images/hms-logo-h.webp"
+        alt="Heranças da Mentalidade do Sucesso"
+        width={820}
+        height={82}
+        className="mx-auto h-auto w-full max-w-[300px]"
+        priority
+      />
+      <p className="mx-auto mt-2 flex w-fit items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-gold">
+        <Award className="h-3.5 w-3.5" /> Diagnóstico Oriental
+      </p>
 
       <div className="mt-5 overflow-hidden rounded-2xl shadow-card">
         <Image
@@ -160,6 +165,13 @@ function Quiz({ index, onAnswer }: { index: number; onAnswer: (k: string) => voi
 
   return (
     <section className="shadow-elevated ring-hairline rounded-3xl bg-card p-7">
+      <Image
+        src="/images/hms-logo-h.webp"
+        alt="Heranças da Mentalidade do Sucesso"
+        width={820}
+        height={82}
+        className="mx-auto mb-5 h-auto w-full max-w-[220px] opacity-90"
+      />
       <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
         <span>
           Pergunta <span className="text-navy">{String(index + 1).padStart(2, "0")}</span> de{" "}
@@ -317,6 +329,15 @@ function Diagnostico({ onNext }: { onNext: () => void }) {
   const date = new Date().toLocaleDateString("pt-BR");
   return (
     <section className="shadow-elevated ring-hairline overflow-hidden rounded-3xl bg-card">
+      <div className="border-b border-border px-7 py-4">
+        <Image
+          src="/images/hms-logo-h.webp"
+          alt="Heranças da Mentalidade do Sucesso"
+          width={820}
+          height={82}
+          className="mx-auto h-auto w-full max-w-[260px]"
+        />
+      </div>
       {/* Banner do diagnóstico — Mente Sabotadora × Mente Próspera */}
       <Image
         src="/images/diagnostico-banner.webp"
@@ -445,11 +466,11 @@ function Bridge({ onNext }: { onNext: () => void }) {
     <section className="shadow-elevated ring-hairline rounded-3xl bg-card p-7">
       <div className="flex justify-center">
         <Image
-          src="/images/hms-emblem.webp"
+          src="/images/hms-logo-h.webp"
           alt="Heranças da Mentalidade do Sucesso"
-          width={240}
-          height={240}
-          className="h-16 w-16 rounded-full ring-1 ring-gold/30"
+          width={820}
+          height={82}
+          className="h-auto w-full max-w-[280px]"
         />
       </div>
       <div className="mt-6 space-y-4 text-[17px] leading-relaxed text-foreground/85">
