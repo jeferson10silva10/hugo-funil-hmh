@@ -146,12 +146,14 @@ function Landing({ onStart }: { onStart: () => void }) {
 
       <div className="mt-5 overflow-hidden rounded-2xl shadow-card">
         <Image
-          src="https://hugomiyazakioriental.org/images/crianca-ouvidos-768.webp"
+          src="/images/crianca-ouvidos-768.webp"
           alt="Padrão familiar herdado"
           width={768}
           height={432}
           className="h-auto w-full object-cover"
+          sizes="(max-width: 640px) 100vw, 768px"
           priority
+          fetchPriority="high"
         />
       </div>
 
@@ -367,11 +369,13 @@ function HugoProof() {
   return (
     <div className="overflow-hidden rounded-2xl shadow-card ring-1 ring-border/70">
       <Image
-        src="https://hugomiyazakioriental.org/assets/hugo-instagram-BLdWfVDx.webp"
+        src="/assets/hugo-instagram.webp"
         alt="Perfil verificado de Hugo Miyazaki no Instagram — 290 mil seguidores"
         width={700}
         height={364}
         className="h-auto w-full"
+        sizes="(max-width: 640px) 100vw, 700px"
+        loading="lazy"
       />
     </div>
   );

@@ -396,11 +396,12 @@ export function Vsl() {
       {/* Garantia */}
       <div className="mt-6 flex flex-col items-center rounded-3xl border border-border bg-card p-6 text-center shadow-card">
         <Image
-          src="https://hugomiyazakioriental.org/assets/garantia-30dias-Db4xU6mB.webp"
+          src="/images/garantia-30dias.webp"
           alt="Selo Garantia 30 dias"
           width={112}
           height={112}
           className="h-24 w-24"
+          loading="lazy"
         />
         <p className="font-display mt-3 flex items-center gap-2 text-xl font-semibold text-foreground">
           <ShieldCheck className="h-5 w-5 text-[#1d8755]" /> Garantia de 30 dias

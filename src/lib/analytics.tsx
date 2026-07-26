@@ -25,6 +25,9 @@ type EventProps = Record<string, string | number | boolean | undefined>;
 /* ============ PROVIDER (envolve o app) ============ */
 export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
+    // Init adiado pra depois do primeiro paint — tira PostHog+Pixel do caminho crítico
+    // (reduz Total Blocking Time no PageSpeed sem perder nenhum evento).
+    const initAnalytics = () => {
     // 1) PostHog — só se a key existir
     if (typeof window !== "undefined" && POSTHOG_KEY && !posthog.__loaded) {
       posthog.init(POSTHOG_KEY, {
@@ -63,6 +66,16 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
       const fbq = (window as unknown as { fbq: (c: string, ...a: unknown[]) => void }).fbq;
       fbq("init", META_PIXEL_ID);
       fbq("track", "PageView");
+    }
+    };
+
+    const w = window as unknown as {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+    };
+    if (typeof w.requestIdleCallback === "function") {
+      w.requestIdleCallback(initAnalytics, { timeout: 3000 });
+    } else {
+      setTimeout(initAnalytics, 1800);
     }
   }, []);
 
