@@ -151,9 +151,9 @@ function Landing({ onStart }: { onStart: () => void }) {
           width={768}
           height={432}
           className="h-auto w-full object-cover"
-          sizes="(max-width: 640px) 100vw, 768px"
           priority
           fetchPriority="high"
+          unoptimized
         />
       </div>
 
