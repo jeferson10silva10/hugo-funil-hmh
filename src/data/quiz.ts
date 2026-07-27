@@ -41,7 +41,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     id: 3,
     question: "Nos últimos 12 meses, quantos projetos você começou e NÃO terminou?",
     options: [
-      { key: "A", text: "Vários. Começo empolgado e abandono no meio", weight: "aprisionada" },
+      { key: "A", text: "Vários. Começo a mil e abandono no meio", weight: "aprisionada" },
       { key: "B", text: "Alguns. Termino uns, abandono outros", weight: "adormecida" },
       { key: "C", text: "Poucos. Termino quase tudo, mas demora muito", weight: "adormecida" },
     ],
@@ -51,7 +51,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     question: "Quando você vê alguém da sua idade conquistando muito mais que você, o que sente?",
     options: [
       { key: "A", text: "Acho que teve sorte ou passou por cima de alguém", weight: "escrava" },
-      { key: "B", text: "Fico inquieto. Penso que podia ser eu", weight: "aprisionada" },
+      { key: "B", text: "Sinto um aperto. Penso que podia ser eu", weight: "aprisionada" },
       { key: "C", text: "Me inspiro, mas penso que vou no meu ritmo", weight: "adormecida" },
     ],
   },
@@ -110,12 +110,12 @@ export const PERFIS: Record<Arquetipo, Perfil> = {
       "Toda vez que você pensa em VOCÊ, aparece alguém precisando — e você larga o seu.",
       "Essa é uma Herança Mental Herdada de servidão. Foi instalada quando você era criança, ouvindo que 'egoísmo é feio' e que 'ajudar é honra'.",
       "Ela roda em segundo plano há décadas. Sabota toda decisão que envolve você em primeiro lugar.",
-      "Sozinha, você não sai daí. Não porque é fraca. Porque essa Herança foi feita pra ser invisível — e pra você achar que 'é o certo'.",
+      "Por conta própria, você não sai daí. E não é por fraqueza. Essa Herança foi feita pra ser invisível — e pra você achar que 'é o certo'.",
     ],
     reframe:
       "Isso NÃO é culpa sua. Você não escolheu se apagar — te ensinaram que se apagar é ser boa pessoa. E é exatamente por isso que dá pra reverter.",
     ganchoJapones:
-      "Na Medicina Oriental Japonesa, esse padrão tem nome: Ishin-Denshin (以心伝心) — a herança silenciosa que passa de mãe pra filha sem uma palavra. É isso que o Hugo remove no Protocolo.",
+      "Na Medicina Oriental Japonesa, esse padrão tem nome: Ishin-Denshin (以心伝心) — a herança silenciosa que passa de geração em geração sem uma palavra. É isso que o Hugo remove no Protocolo.",
     prognostico:
       "Se você não remover essa Herança nos próximos 6 meses, você vai continuar trabalhando 3× mais que os outros e recebendo metade. 2026 vai ser igual a 2025.",
   },
@@ -128,10 +128,10 @@ export const PERFIS: Record<Arquetipo, Perfil> = {
     frasesDor: [
       "Você não tem problema de disciplina. Você não tem problema de motivação.",
       "O problema é que TODA vez que você tenta focar em VOCÊ, algo trava por dentro. Não é você — é a Herança.",
-      "Você começa empolgada. Empurra por um tempo. E aí, do nada, desanda. Já perdeu a conta de quantas vezes.",
+      "Você começa com tudo. Empurra por um tempo. E aí, do nada, desanda. Já perdeu a conta de quantas vezes.",
       "Essa é uma Herança Mental Herdada de Aprisionamento — uma programação instalada nos primeiros 7 anos de vida.",
       "Ela roda em segundo plano há décadas. A cada vez que você tenta crescer, ela ativa. A cada vez que você decide mudar, ela contra-ataca.",
-      "Sozinha, você não sai daí. Não porque você é fraca. Porque a Herança foi feita pra ser invisível.",
+      "Por conta própria, você não sai daí. E não é por fraqueza. A Herança foi feita pra ser invisível.",
     ],
     reframe:
       "Isso NÃO é culpa sua. Você não escolheu essa programação — ela foi instalada quando você era criança, sem você perceber. E é exatamente por isso que dá pra remover.",
