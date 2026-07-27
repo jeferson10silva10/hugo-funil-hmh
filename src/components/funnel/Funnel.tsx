@@ -154,7 +154,7 @@ export function Funnel() {
           />
         )}
         {stage === "calibracao" && <Calibracao nome={nome} onSubmit={submitNota} />}
-        {stage === "bridge" && <Bridge onNext={() => setStage("vsl")} musicaUrl={musicaUrl} nota={nota} />}
+        {stage === "bridge" && <Bridge onNext={() => setStage("vsl")} nota={nota} />}
         {stage === "vsl" && <Vsl />}
       </div>
     </main>
@@ -650,7 +650,6 @@ function Diagnostico({
   const isSevero = perfil.severidadeCor === "vermelho";
   return (
     <>
-      <DiagBgm musicaUrl={musicaUrl} />
       <section className="shadow-elevated ring-hairline overflow-hidden rounded-3xl bg-card">
       <div className="border-b border-border px-7 py-4">
         <Image
@@ -815,44 +814,96 @@ function Experiencia({ nome, musicaUrl, onDone }: { nome: string; musicaUrl?: st
   type Phase = "intro" | "ritual" | "musica" | "transicao";
   const [phase, setPhase] = useState<Phase>("intro");
   const [ready, setReady] = useState(false); // pessoa clicou "estou pronto"
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  // 2 canais de audio: musica (fundo, loop) + voz Hugo (protagonista, sequencial)
+  const musicaRef = useRef<HTMLAudioElement | null>(null);
+  const vozRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     track("experiencia_view", { tem_musica: !!musicaUrl });
   }, [musicaUrl]);
 
-  // sequencia dos audios apos "estou pronto"
+  // ao clicar "estou pronto": inicia MUSICA em loop de fundo + entra na fase ritual
   useEffect(() => {
     if (!ready) return;
-    const a = audioRef.current;
-    if (!a) return;
+    const m = musicaRef.current;
+    if (m && musicaUrl) {
+      m.src = musicaUrl;
+      m.loop = true;
+      m.volume = 0.28; // fundo suave enquanto o Hugo fala
+      void m.play().catch(() => {}); // se falhar, segue sem musica
+      track("musica_ouvida", { url: musicaUrl });
+    } else if (!musicaUrl) {
+      track("musica_skip_fallback", { motivo: "nao_pronta" });
+    }
+  }, [ready, musicaUrl]);
+
+  // sequencia da VOZ do Hugo por cima da musica
+  useEffect(() => {
+    if (!ready) return;
+    const v = vozRef.current;
+    const m = musicaRef.current;
+    if (!v) return;
     if (phase === "ritual") {
-      a.src = "/audio/hugo/ritual.mp3";
-      a.volume = 0.9;
-      void a.play().catch(() => setPhase("musica"));
-      a.onended = () => setPhase("musica");
+      // musica de fundo baixinha (0.28) + voz Hugo protagonista (0.9)
+      if (m) m.volume = 0.28;
+      v.src = "/audio/hugo/ritual.mp3";
+      v.volume = 0.95;
+      void v.play().catch(() => setPhase("musica"));
+      v.onended = () => setPhase("musica");
     } else if (phase === "musica") {
-      // se tem musica pronta => toca. se nao (ainda gerando, erro, timeout) => pula pra transicao
-      if (musicaUrl) {
-        track("musica_ouvida", { url: musicaUrl });
-        a.src = musicaUrl;
-        a.volume = 0.55;
-        a.onended = () => setPhase("transicao");
-        void a.play().catch(() => {
-          track("musica_skip_fallback", { motivo: "play_error" });
-          setPhase("transicao");
-        });
-      } else {
-        track("musica_skip_fallback", { motivo: "nao_pronta" });
+      // musica sobe pra protagonista (0.65) — pessoa fica so ouvindo a musica personalizada
+      // se nao tem musica, pula direto pra transicao
+      if (!musicaUrl) {
         setPhase("transicao");
+        return;
+      }
+      if (m) {
+        m.volume = 0.65;
+        // dispara transicao quando a musica dela terminar 1x
+        const onLoopStart = () => {
+          m.onseeked = null;
+          setPhase("transicao");
+        };
+        // como esta em loop, escutamos o momento de voltar ao inicio (timeupdate quando volta pra 0)
+        let anterior = m.currentTime;
+        const check = () => {
+          if (m.currentTime < anterior - 1) {
+            m.removeEventListener("timeupdate", check);
+            onLoopStart();
+          }
+          anterior = m.currentTime;
+        };
+        m.addEventListener("timeupdate", check);
       }
     } else if (phase === "transicao") {
-      a.src = "/audio/hugo/transicao.mp3";
-      a.volume = 0.9;
-      a.onended = () => onDone();
-      void a.play().catch(() => onDone());
+      // musica volta pra baixinha, voz Hugo por cima
+      if (m) m.volume = 0.28;
+      v.src = "/audio/hugo/transicao.mp3";
+      v.volume = 0.95;
+      v.onended = () => {
+        if (m) {
+          // fade-out da musica ao sair
+          const fade = setInterval(() => {
+            m.volume = Math.max(0, m.volume - 0.05);
+            if (m.volume <= 0) {
+              clearInterval(fade);
+              m.pause();
+            }
+          }, 80);
+        }
+        onDone();
+      };
+      void v.play().catch(() => onDone());
     }
   }, [phase, ready, musicaUrl, onDone]);
+
+  // cleanup: garante que audios parem se pessoa fechar/pular
+  useEffect(() => {
+    return () => {
+      musicaRef.current?.pause();
+      vozRef.current?.pause();
+    };
+  }, []);
 
   // botao "estou pronto" arma tudo
   const start = () => {
@@ -870,7 +921,8 @@ function Experiencia({ nome, musicaUrl, onDone }: { nome: string; musicaUrl?: st
 
   return (
     <>
-      <audio ref={audioRef} preload="auto" />
+      <audio ref={musicaRef} preload="auto" />
+      <audio ref={vozRef} preload="auto" />
       <section className="shadow-elevated bg-navy-grad relative overflow-hidden rounded-3xl p-8 text-center text-white">
         {!ready ? (
           // TELA 1: convite pro ritual
@@ -992,7 +1044,7 @@ function Calibracao({ nome, onSubmit }: { nome: string; onSubmit: (n: number) =>
   );
 }
 
-function Bridge({ onNext, musicaUrl, nota }: { onNext: () => void; musicaUrl?: string | null; nota: number | null }) {
+function Bridge({ onNext, nota }: { onNext: () => void; nota: number | null }) {
   const [left, setLeft] = useState(15);
   useEffect(() => {
     track("funnel_bridge_view", { nota: nota ?? -1 });
@@ -1010,8 +1062,6 @@ function Bridge({ onNext, musicaUrl, nota }: { onNext: () => void; musicaUrl?: s
 
   return (
     <>
-      {/* musica da pessoa continua tocando de fundo, se estiver disponivel */}
-      <DiagBgm musicaUrl={musicaUrl} />
       <section className="shadow-elevated ring-hairline rounded-3xl bg-card p-7">
       <div className="flex justify-center">
         <Image
