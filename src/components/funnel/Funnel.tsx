@@ -1007,19 +1007,6 @@ function Calibracao({ nome, onSubmit }: { nome: string; onSubmit: (n: number) =>
   );
 }
 
-/* ---------------- Áudio de validação do Hugo (toca no bridge) ---------------- */
-function ValidacaoHugo({ src }: { src: string }) {
-  useEffect(() => {
-    const a = new Audio(src);
-    a.volume = 0.9;
-    void a.play().catch(() => {}); // se navegador bloquear, ignora
-    return () => {
-      a.pause();
-    };
-  }, [src]);
-  return null;
-}
-
 function Bridge({ onNext, musicaUrl, nota }: { onNext: () => void; musicaUrl?: string | null; nota: number | null }) {
   const [left, setLeft] = useState(15);
   useEffect(() => {
@@ -1032,15 +1019,14 @@ function Bridge({ onNext, musicaUrl, nota }: { onNext: () => void; musicaUrl?: s
     track("funnel_bridge_cta_click");
     onNext();
   };
-  // audio de validacao do Hugo: nota >=5 = forte, <5 = sutil
-  const validacaoSrc = nota !== null ? (nota >= 5 ? "/audio/hugo/validacao-forte.mp3" : "/audio/hugo/validacao-sutil.mp3") : null;
+  // (audio de validacao do Hugo aqui foi REMOVIDO — Hugo ja fala bastante na Experiencia+Calibracao;
+  // o `nota` continua sendo capturado no PostHog pra segmentar copy/CTAs no futuro se necessario)
+  void nota; // evita 'unused' warning; ja e usado no track do useEffect
 
   return (
     <>
       {/* musica da pessoa continua tocando de fundo, se estiver disponivel */}
       <DiagBgm musicaUrl={musicaUrl} />
-      {/* audio de validacao do Hugo toca AUTOMATICO ao entrar no bridge */}
-      {validacaoSrc && <ValidacaoHugo src={validacaoSrc} />}
       <section className="shadow-elevated ring-hairline rounded-3xl bg-card p-7">
       <div className="flex justify-center">
         <Image
@@ -1052,20 +1038,14 @@ function Bridge({ onNext, musicaUrl, nota }: { onNext: () => void; musicaUrl?: s
         />
       </div>
       <div className="mt-6 space-y-4 text-[17px] leading-relaxed text-foreground/85">
-        <p>Você acabou de descobrir o nome da força invisível que vem te travando.</p>
         <p className="font-display text-xl font-semibold text-foreground">
-          Mas isso ainda é só o começo.
+          Você sentiu a frequência agir dentro de você.
         </p>
         <p>
-          Por trás da verdade que você conhece… existe uma outra verdade. E é essa verdade que
-          vira a chave.
+          Agora eu vou te mostrar <strong className="text-foreground">exatamente por que essa
+          herança foi instalada</strong> — e o que fazer pra remover ela pra sempre.
         </p>
-        <p>
-          Eu vou te revelar exatamente como essa Herança foi instalada dentro da sua mente e o
-          que precisa ser feito para quebrar esse padrão.
-        </p>
-        <p className="font-semibold text-foreground">Assista o próximo vídeo até o final.</p>
-        <p>Ele irá mudar a forma de como você enxerga a sua própria vida.</p>
+        <p className="font-semibold text-foreground">Assista o próximo vídeo. Ele muda tudo.</p>
       </div>
 
       <div className="mt-7">
