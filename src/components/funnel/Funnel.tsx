@@ -1028,19 +1028,18 @@ const DECRETOS = [
 
 function DecretosAceite({ nome }: { nome: string }) {
   const [idx, setIdx] = useState(0);
-  const [visible, setVisible] = useState(true);
   useEffect(() => {
-    // fade-out -> troca frase -> fade-in, a cada ~9.5s
+    // troca frase a cada ~9.5s (o CSS ja cuida das transicoes de palavra)
     const iv = setInterval(() => {
-      setVisible(false);
-      setTimeout(() => {
-        setIdx((i) => (i + 1) % DECRETOS.length);
-        setVisible(true);
-      }, 800);
+      setIdx((i) => (i + 1) % DECRETOS.length);
     }, 9500);
     return () => clearInterval(iv);
   }, []);
   void nome; // reservado pra variacao com nome no futuro se quisermos
+
+  // separa a frase em palavras pra animar 1 a 1 (stagger lento — vibe mantra)
+  const palavras = DECRETOS[idx].split(" ");
+
   return (
     <div className="mt-6">
       {/* bolinha menor no topo — sinal 'a musica continua' */}
@@ -1050,14 +1049,23 @@ function DecretosAceite({ nome }: { nome: string }) {
           <span className="text-xl">✦</span>
         </div>
       </div>
-      {/* decreto — grande, dourado, fade in/out */}
+      {/* decreto — palavras aparecem 1 a 1, com blur/fade lento (vibe mantra) */}
       <div className="mt-8 flex min-h-[9rem] items-center justify-center px-2">
         <p
-          className={`font-display text-[1.75rem] font-semibold leading-tight tracking-tight text-gold-foil transition-opacity duration-700 ${
-            visible ? "opacity-100" : "opacity-0"
-          }`}
+          key={idx}
+          className="font-display flex flex-wrap justify-center gap-x-2 gap-y-1 text-[1.75rem] font-semibold leading-tight tracking-tight text-gold-foil"
         >
-          &ldquo;{DECRETOS[idx]}&rdquo;
+          {palavras.map((palavra, i) => (
+            <span
+              key={`${idx}-${i}`}
+              className="decreto-palavra inline-block"
+              style={{ animationDelay: `${i * 220}ms` }}
+            >
+              {i === 0 && "“"}
+              {palavra}
+              {i === palavras.length - 1 && "”"}
+            </span>
+          ))}
         </p>
       </div>
       <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/45">
