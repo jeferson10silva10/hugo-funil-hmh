@@ -75,8 +75,10 @@ export function letraFrequenciaRiqueza(nome: string) {
   // Sotaque/voz/estilo agora vao SO no prompt separado, nunca dentro da letra.
   return `[Spoken intro]
 ${n}...
-${n}, escuta.
-Essa mensagem é sua.
+respira fundo, e escuta.
+Essa mensagem foi feita só pra você.
+Tudo o que precisa acontecer,
+começa agora.
 
 [Verse]
 ${n},
@@ -84,13 +86,18 @@ a herança que te prendia
 hoje se desfaz.
 
 Sua mente é sua,
-sua vida é sua.
+sua vida é sua,
+seu caminho é seu.
+
+[Bridge]
+Solta o que já foi.
+Recebe o que vem.
 
 [Chorus]
 ${n}, a frequência da riqueza
 já vive em você.
 Respire...
-você chegou em casa.`;
+chegou a sua vez.`;
 }
 
 /** Prompt de estilo padrão pra Mureka gerar no timbre certo.
