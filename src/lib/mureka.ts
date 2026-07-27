@@ -46,7 +46,7 @@ export async function generateSong(args: GenerateArgs): Promise<MurekaTask> {
     body: JSON.stringify({
       lyrics: args.lyrics,
       prompt: args.prompt,
-      model: args.model ?? "auto",
+      model: args.model ?? "mureka-6",
     }),
   });
   const text = await res.text();
@@ -63,34 +63,26 @@ export async function querySong(taskId: string): Promise<MurekaTask> {
   return JSON.parse(text) as MurekaTask;
 }
 
-/** Monta a letra da "Música Angelical da Frequência da Riqueza" personalizada. */
+/** Monta a letra da "Música Angelical da Frequência da Riqueza" personalizada.
+ *  Estilo: adoração/gospel suave, lenta, tom acolhedor (não ASMR sussurrado — evita ficar "assustador"). */
 export function letraFrequenciaRiqueza(nome: string) {
   const n = (nome || "").trim().split(" ")[0] || "Você";
-  return `[Intro — soft rain and slow piano, no vocals]
-
-[Verse — female voice, very slow, whispered, ASMR-like]
+  return `[Verse — soft female worship voice, slow and gentle, warm]
 ${n}...
-
-A herança que te prendia...
+A herança que te prendia
 hoje se desfaz.
 
-${n}...
+Sua mente é sua,
+sua vida é sua.
 
-Sua mente é sua.
-Sua vida é sua.
-
-[Verse 2 — same voice, even softer]
-A frequência da riqueza...
+[Chorus — same voice, a little brighter]
+${n}, a frequência da riqueza
 já vive em você.
-
-${n}...
-
-Respire.
-Você chegou em casa.
-
-[Outro — rain and piano fade out slowly]`;
+Respire...
+você chegou em casa.`;
 }
 
-/** Prompt de estilo padrão pra Mureka gerar no timbre certo. */
+/** Prompt de estilo padrão pra Mureka gerar no timbre certo.
+ *  Trocamos ASMR sussurrado por adoração/gospel calmo (mais familiar pro publico 45+ do Hugo). */
 export const PROMPT_FREQUENCIA_RIQUEZA =
-  "ambient meditation, soft rain sound effect, gentle piano pad, female voice very slow whispered spoken ASMR, healing, peaceful, 528hz feel, no drums, no percussion, sleep-friendly, Portuguese lyrics";
+  "gentle Brazilian gospel worship ballad, soft female vocal warm and prayerful, slow tempo 60 bpm, acoustic piano and light strings, soft rain ambience in the background, peaceful and healing, 528hz feel, no drums, no percussion, no beat, Portuguese lyrics, comforting like a prayer";
