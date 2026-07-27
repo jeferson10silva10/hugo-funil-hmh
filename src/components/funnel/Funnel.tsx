@@ -17,7 +17,7 @@ import { QUIZ_QUESTIONS, PERFIS, calcularArquetipo, citarResposta, type Arquetip
 import { track, trackMeta } from "@/lib/analytics";
 import { Vsl } from "./Vsl";
 
-type Stage = "landing" | "quiz" | "nome" | "loading" | "diagnostico" | "bridge" | "vsl";
+type Stage = "landing" | "quiz" | "nome" | "loading" | "diagnostico" | "experiencia" | "calibracao" | "bridge" | "vsl";
 
 export function Funnel() {
   const [stage, setStage] = useState<Stage>("landing");
@@ -57,6 +57,16 @@ export function Funnel() {
   const goToVideo = () => {
     track("funnel_diag_cta_click", { arquetipo });
     playTransition();
+    // depois do diagnostico vai pra EXPERIENCIA (ritual + musica + transicao)
+    setStage("experiencia");
+  };
+
+  const [nota, setNota] = useState<number | null>(null);
+  const submitNota = (n: number) => {
+    setNota(n);
+    const faixa = n >= 5 ? "forte" : "sutil";
+    track("calibracao_nota", { nota: n, faixa });
+    // depois da nota vai pra bridge (a proxima etapa antes da VSL)
     setStage("bridge");
   };
 
@@ -151,7 +161,15 @@ export function Funnel() {
             musicaUrl={musicaUrl}
           />
         )}
-        {stage === "bridge" && <Bridge onNext={() => setStage("vsl")} musicaUrl={musicaUrl} />}
+        {stage === "experiencia" && (
+          <Experiencia
+            nome={nome}
+            musicaUrl={musicaUrl}
+            onDone={() => setStage("calibracao")}
+          />
+        )}
+        {stage === "calibracao" && <Calibracao nome={nome} onSubmit={submitNota} />}
+        {stage === "bridge" && <Bridge onNext={() => setStage("vsl")} musicaUrl={musicaUrl} nota={nota} />}
         {stage === "vsl" && <Vsl />}
       </div>
     </main>
@@ -804,22 +822,225 @@ function Diagnostico({
 }
 
 /* ---------------- Bridge ---------------- */
-function Bridge({ onNext, musicaUrl }: { onNext: () => void; musicaUrl?: string | null }) {
+/* ---------------- EXPERIÊNCIA (ritual + música + transição) ---------------- */
+/* Regra de ouro: NUNCA trava se a música não estiver pronta.
+   Fluxo: ritual (áudio Hugo) -> tenta música com timeout 3s -> se ok toca até fim, se não pula.
+   Áudio de transição (Hugo) sempre toca no fim, pra levar pra calibração. */
+function Experiencia({ nome, musicaUrl, onDone }: { nome: string; musicaUrl?: string | null; onDone: () => void }) {
+  type Phase = "intro" | "ritual" | "musica" | "transicao";
+  const [phase, setPhase] = useState<Phase>("intro");
+  const [ready, setReady] = useState(false); // pessoa clicou "estou pronto"
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    track("experiencia_view", { tem_musica: !!musicaUrl });
+  }, [musicaUrl]);
+
+  // sequencia dos audios apos "estou pronto"
+  useEffect(() => {
+    if (!ready) return;
+    const a = audioRef.current;
+    if (!a) return;
+    if (phase === "ritual") {
+      a.src = "/audio/hugo/ritual.mp3";
+      a.volume = 0.9;
+      void a.play().catch(() => setPhase("musica"));
+      a.onended = () => setPhase("musica");
+    } else if (phase === "musica") {
+      // se tem musica pronta => toca. se nao (ainda gerando, erro, timeout) => pula pra transicao
+      if (musicaUrl) {
+        track("musica_ouvida", { url: musicaUrl });
+        a.src = musicaUrl;
+        a.volume = 0.55;
+        a.onended = () => setPhase("transicao");
+        void a.play().catch(() => {
+          track("musica_skip_fallback", { motivo: "play_error" });
+          setPhase("transicao");
+        });
+      } else {
+        track("musica_skip_fallback", { motivo: "nao_pronta" });
+        setPhase("transicao");
+      }
+    } else if (phase === "transicao") {
+      a.src = "/audio/hugo/transicao.mp3";
+      a.volume = 0.9;
+      a.onended = () => onDone();
+      void a.play().catch(() => onDone());
+    }
+  }, [phase, ready, musicaUrl, onDone]);
+
+  // botao "estou pronto" arma tudo
+  const start = () => {
+    track("ritual_start");
+    setReady(true);
+    setPhase("ritual");
+  };
+
+  const skip = () => {
+    track("experiencia_skip", { phase });
+    onDone();
+  };
+
+  const displayName = nome || "Você";
+
+  return (
+    <>
+      <audio ref={audioRef} preload="auto" />
+      <section className="shadow-elevated bg-navy-grad relative overflow-hidden rounded-3xl p-8 text-center text-white">
+        {!ready ? (
+          // TELA 1: convite pro ritual
+          <>
+            <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-gold">
+              ✦ Experiência única ✦
+            </p>
+            <h2 className="font-display mt-3 text-[1.9rem] font-semibold leading-tight text-white">
+              {displayName}, você está prestes a viver algo que{" "}
+              <span className="text-gold-foil">99% das pessoas nunca viveram.</span>
+            </h2>
+            <p className="mt-5 text-[15px] leading-relaxed text-white/85">
+              Uma frequência criada especificamente pra você — pra desprogramar a herança mental
+              que te trava, e ativar padrões de sucesso na sua mente.
+            </p>
+
+            <div className="mt-6 rounded-2xl border border-gold/30 bg-white/6 p-5 text-left">
+              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-gold">
+                Antes de começar:
+              </p>
+              <ul className="mt-3 space-y-2 text-[14px] leading-relaxed text-white/90">
+                <li className="flex gap-2">🎧 <span>Coloque um fone de ouvido</span></li>
+                <li className="flex gap-2">🧘 <span>Sente-se confortavelmente</span></li>
+                <li className="flex gap-2">👁 <span>Feche os olhos e deixe sua mente vagar</span></li>
+                <li className="flex gap-2">🌬️ <span>Respire fundo três vezes</span></li>
+              </ul>
+            </div>
+
+            <button
+              onClick={start}
+              className="hm-glow bg-gold-foil text-navy mt-7 flex w-full items-center justify-center gap-2 rounded-2xl px-7 py-4 text-base font-bold uppercase tracking-wide shadow-elevated transition active:scale-[0.98]"
+            >
+              ✦ Estou pronto(a) — iniciar
+            </button>
+
+            <button
+              onClick={skip}
+              className="mt-4 text-xs text-white/50 underline underline-offset-4 hover:text-white/75"
+            >
+              pular ritual
+            </button>
+          </>
+        ) : (
+          // TELA 2: rodando (olhos fechados)
+          <>
+            <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-gold">
+              {phase === "ritual" && "Instruções"}
+              {phase === "musica" && (musicaUrl ? "🎵 Sua frequência" : "✦ Preparando")}
+              {phase === "transicao" && "✦ Retornando"}
+            </p>
+            <h2 className="font-display mt-4 text-[1.6rem] font-semibold leading-snug text-white">
+              {phase === "ritual" && "Feche os olhos e respire."}
+              {phase === "musica" && (musicaUrl ? `${displayName}, deixe a frequência agir.` : "Um momento…")}
+              {phase === "transicao" && "Respire. Volte com calma."}
+            </h2>
+
+            {/* pulsar visual — bolinha respirando */}
+            <div className="mt-10 flex justify-center">
+              <div className="hm-pulse relative flex h-32 w-32 items-center justify-center rounded-full border-2 border-gold/60">
+                <div className="hm-pulse absolute inset-2 rounded-full border border-gold/40" />
+                <div className="hm-pulse absolute inset-6 rounded-full bg-gold/15" />
+                <span className="text-3xl">✦</span>
+              </div>
+            </div>
+
+            <p className="mt-10 text-xs text-white/45">
+              o próximo passo aparece automaticamente
+            </p>
+            <button
+              onClick={skip}
+              className="mt-6 text-[11px] text-white/40 underline underline-offset-4 hover:text-white/70"
+            >
+              pular
+            </button>
+          </>
+        )}
+      </section>
+    </>
+  );
+}
+
+/* ---------------- CALIBRAÇÃO (0-10) ---------------- */
+function Calibracao({ nome, onSubmit }: { nome: string; onSubmit: (n: number) => void }) {
+  useEffect(() => {
+    track("calibracao_view");
+  }, []);
+  const displayName = nome || "Você";
+  return (
+    <section className="shadow-elevated ring-hairline rounded-3xl bg-card p-7">
+      <p className="text-center text-[11px] font-bold uppercase tracking-[0.18em] text-gold">
+        Sem pensar muito
+      </p>
+      <h2 className="font-display mt-2 text-center text-[1.7rem] font-semibold leading-tight text-foreground">
+        {displayName}, de <span className="text-gold-foil">0 a 10</span>,
+        quanto você sentiu a mudança agora?
+      </h2>
+      <p className="mx-auto mt-2 max-w-sm text-center text-[13px] leading-relaxed text-muted-foreground">
+        Responda com o que veio primeiro — a mente que responde rápido é a mais verdadeira.
+      </p>
+
+      <div className="mt-7 grid grid-cols-6 gap-2 sm:grid-cols-11">
+        {Array.from({ length: 11 }, (_, i) => i).map((n) => (
+          <button
+            key={n}
+            onClick={() => onSubmit(n)}
+            className="hm-fade-up bg-navy-grad group flex aspect-square items-center justify-center rounded-xl text-lg font-bold text-white shadow-card ring-1 ring-gold/25 transition hover:-translate-y-0.5 hover:ring-gold/70 active:scale-95"
+            style={{ animationDelay: `${n * 40}ms` }}
+          >
+            {n}
+          </button>
+        ))}
+      </div>
+
+      <div className="mt-6 flex justify-between text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+        <span>nada</span>
+        <span>muito forte</span>
+      </div>
+    </section>
+  );
+}
+
+/* ---------------- Áudio de validação do Hugo (toca no bridge) ---------------- */
+function ValidacaoHugo({ src }: { src: string }) {
+  useEffect(() => {
+    const a = new Audio(src);
+    a.volume = 0.9;
+    void a.play().catch(() => {}); // se navegador bloquear, ignora
+    return () => {
+      a.pause();
+    };
+  }, [src]);
+  return null;
+}
+
+function Bridge({ onNext, musicaUrl, nota }: { onNext: () => void; musicaUrl?: string | null; nota: number | null }) {
   const [left, setLeft] = useState(15);
   useEffect(() => {
-    track("funnel_bridge_view");
+    track("funnel_bridge_view", { nota: nota ?? -1 });
     const iv = setInterval(() => setLeft((l) => (l > 0 ? l - 1 : 0)), 1000);
     return () => clearInterval(iv);
-  }, []);
+  }, [nota]);
   const ready = left <= 0;
   const handleClick = () => {
     track("funnel_bridge_cta_click");
     onNext();
   };
+  // audio de validacao do Hugo: nota >=5 = forte, <5 = sutil
+  const validacaoSrc = nota !== null ? (nota >= 5 ? "/audio/hugo/validacao-forte.mp3" : "/audio/hugo/validacao-sutil.mp3") : null;
 
   return (
     <>
+      {/* musica da pessoa continua tocando de fundo, se estiver disponivel */}
       <DiagBgm musicaUrl={musicaUrl} />
+      {/* audio de validacao do Hugo toca AUTOMATICO ao entrar no bridge */}
+      {validacaoSrc && <ValidacaoHugo src={validacaoSrc} />}
       <section className="shadow-elevated ring-hairline rounded-3xl bg-card p-7">
       <div className="flex justify-center">
         <Image
