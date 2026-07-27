@@ -67,12 +67,16 @@ export async function querySong(taskId: string): Promise<MurekaTask> {
  *  Estilo: adoração/gospel suave, lenta, tom acolhedor (não ASMR sussurrado — evita ficar "assustador"). */
 export function letraFrequenciaRiqueza(nome: string) {
   const n = (nome || "").trim().split(" ")[0] || "Você";
-  return `[Spoken intro — soft prayerful female voice, warm and slow, like a blessing before a hymn]
+  // IMPORTANTE: as tags [pt-BR] e "Brazilian Portuguese" nas anotacoes reforcam pro
+  // Mureka nao cair em espanhol ou portugues europeu (comum quando o prompt e' em ingles).
+  return `[Language: Brazilian Portuguese — pt-BR — sotaque brasileiro, NUNCA europeu, NUNCA espanhol]
+
+[Spoken intro — Brazilian Portuguese, soft prayerful female voice, warm and slow, like a blessing before a hymn]
 ${n}...
 ${n}, escuta.
 Essa mensagem é sua.
 
-[Verse — soft gospel worship voice, slow and gentle]
+[Verse — Brazilian Portuguese, soft gospel worship voice, slow and gentle]
 ${n},
 a herança que te prendia
 hoje se desfaz.
@@ -80,7 +84,7 @@ hoje se desfaz.
 Sua mente é sua,
 sua vida é sua.
 
-[Chorus — same voice, a little brighter and rising]
+[Chorus — Brazilian Portuguese, same voice, a little brighter and rising]
 ${n}, a frequência da riqueza
 já vive em você.
 Respire...
@@ -90,4 +94,4 @@ você chegou em casa.`;
 /** Prompt de estilo padrão pra Mureka gerar no timbre certo.
  *  Trocamos ASMR sussurrado por adoração/gospel calmo (mais familiar pro publico 45+ do Hugo). */
 export const PROMPT_FREQUENCIA_RIQUEZA =
-  "gentle Brazilian gospel worship ballad, soft female vocal warm and prayerful, opens with a spoken/almost-recited prayer intro before singing begins, slow tempo 60 bpm, acoustic piano and light strings, soft rain ambience in the background, peaceful and healing, 528hz feel, no drums, no percussion, no beat, Portuguese lyrics, comforting like a prayer";
+  "BRAZILIAN PORTUGUESE VOCAL (pt-BR, Brazilian accent — NOT European Portuguese, NOT Spanish), gentle Brazilian gospel worship ballad, soft female vocal warm and prayerful with clear Brazilian pronunciation, opens with a spoken/almost-recited prayer intro before singing begins, slow tempo 60 bpm, acoustic piano and light strings, soft rain ambience in the background, peaceful and healing, 528hz feel, no drums, no percussion, no beat, comforting like a prayer";
