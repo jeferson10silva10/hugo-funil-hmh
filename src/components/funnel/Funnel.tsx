@@ -17,13 +17,14 @@ import { QUIZ_QUESTIONS, PERFIS, calcularArquetipo, citarResposta, type Arquetip
 import { track, trackMeta } from "@/lib/analytics";
 import { Vsl } from "./Vsl";
 
-type Stage = "landing" | "quiz" | "loading" | "diagnostico" | "bridge" | "vsl";
+type Stage = "landing" | "quiz" | "nome" | "loading" | "diagnostico" | "bridge" | "vsl";
 
 export function Funnel() {
   const [stage, setStage] = useState<Stage>("landing");
   const [qIndex, setQIndex] = useState(0);
   const [answers, setAnswers] = useState<string[]>([]);
   const [genero, setGenero] = useState<"homem" | "mulher" | null>(null);
+  const [nome, setNome] = useState("");
   const arquetipo: Arquetipo = answers.length >= QUIZ_QUESTIONS.length
     ? calcularArquetipo(answers)
     : "aprisionada"; // fallback antes do quiz terminar
@@ -57,6 +58,13 @@ export function Funnel() {
     setStage("bridge");
   };
 
+  const submitName = (n: string) => {
+    const clean = n.trim();
+    setNome(clean);
+    track("funnel_name_submit", { genero: genero ?? "", tem_nome: clean.length > 0 });
+    setStage("loading");
+  };
+
   const answer = (key: string) => {
     const q = QUIZ_QUESTIONS[qIndex];
     const opt = q.options.find((o) => o.key === key);
@@ -74,7 +82,7 @@ export function Funnel() {
       const finalArquetipo = calcularArquetipo(nextAnswers);
       track("funnel_quiz_complete", { arquetipo: finalArquetipo, total: nextAnswers.length, genero: genero ?? "" });
       trackMeta("Lead", { content_name: "Diagnóstico HMH", arquetipo: finalArquetipo, genero: genero ?? "" });
-      setStage("loading");
+      setStage("nome");
     }
   };
 
@@ -83,9 +91,10 @@ export function Funnel() {
       <div className="w-full max-w-md">
         {stage === "landing" && <Landing onSelectGender={selectGender} />}
         {stage === "quiz" && <Quiz index={qIndex} onAnswer={answer} />}
+        {stage === "nome" && <NameStep onSubmit={submitName} />}
         {stage === "loading" && <Loading onDone={() => setStage("diagnostico")} />}
         {stage === "diagnostico" && (
-          <Diagnostico onNext={goToVideo} arquetipo={arquetipo} answers={answers} />
+          <Diagnostico onNext={goToVideo} arquetipo={arquetipo} answers={answers} nome={nome} />
         )}
         {stage === "bridge" && <Bridge onNext={() => setStage("vsl")} />}
         {stage === "vsl" && <Vsl />}
@@ -256,6 +265,73 @@ function Quiz({ index, onAnswer }: { index: number; onAnswer: (k: string) => voi
           );
         })}
       </div>
+    </section>
+  );
+}
+
+/* ---------------- Captura de nome (última etapa antes da respiração) ---------------- */
+function NameStep({ onSubmit }: { onSubmit: (n: string) => void }) {
+  const [nome, setNome] = useState("");
+  useEffect(() => {
+    track("funnel_name_view");
+  }, []);
+  const ready = nome.trim().length >= 2;
+  const submit = () => {
+    if (ready) onSubmit(nome.trim());
+  };
+  return (
+    <section className="shadow-elevated ring-hairline rounded-3xl bg-card p-7">
+      <Image
+        src="/images/hms-logo-h.webp"
+        alt="Heranças da Mentalidade do Sucesso"
+        width={820}
+        height={82}
+        className="mx-auto mb-5 h-auto w-full max-w-[220px] opacity-90"
+      />
+      <p className="text-center text-xs font-semibold uppercase tracking-[0.16em] text-gold">
+        Última etapa
+      </p>
+      <h2 className="font-display mt-2 text-center text-[1.7rem] font-semibold leading-snug tracking-tight text-foreground">
+        Como podemos te chamar?
+      </h2>
+      <p className="mx-auto mt-2 max-w-sm text-center text-[14px] leading-relaxed text-muted-foreground">
+        Seu diagnóstico é <strong className="text-foreground">personalizado com o seu nome</strong>.
+        É só o primeiro nome.
+      </p>
+
+      <input
+        type="text"
+        inputMode="text"
+        autoComplete="given-name"
+        value={nome}
+        onChange={(e) => setNome(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") submit();
+        }}
+        placeholder="Seu primeiro nome"
+        autoFocus
+        maxLength={40}
+        className="mt-6 w-full rounded-2xl border border-border bg-secondary/40 px-5 py-4 text-center text-lg font-medium text-foreground outline-none transition focus:border-navy/50 focus:ring-2 focus:ring-navy/15"
+      />
+
+      <div className="mt-5">
+        {ready ? (
+          <div className="hm-fade-up">
+            <PrimaryButton onClick={submit}>Ver meu diagnóstico</PrimaryButton>
+          </div>
+        ) : (
+          <button
+            disabled
+            className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-2xl bg-secondary px-7 py-4 text-base font-semibold uppercase tracking-wide text-muted-foreground"
+          >
+            Ver meu diagnóstico
+          </button>
+        )}
+      </div>
+
+      <p className="mt-4 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+        <Lock className="h-3.5 w-3.5" /> Seus dados são confidenciais
+      </p>
     </section>
   );
 }
@@ -459,10 +535,12 @@ function Diagnostico({
   onNext,
   arquetipo,
   answers,
+  nome,
 }: {
   onNext: () => void;
   arquetipo: Arquetipo;
   answers: string[];
+  nome: string;
 }) {
   useEffect(() => {
     track("funnel_diag_view", { arquetipo });
@@ -495,7 +573,9 @@ function Diagnostico({
         priority
       />
       <div className="flex items-center justify-between border-b border-border px-7 py-3 text-[13px] text-muted-foreground">
-        <span className="font-medium text-foreground/80">Data: {date}</span>
+        <span className="font-medium text-foreground/80">
+          {nome ? `Paciente: ${nome}` : `Data: ${date}`}
+        </span>
         <span className="flex items-center gap-1 uppercase tracking-wide">
           <Lock className="h-3.5 w-3.5" /> Confidencial
         </span>
@@ -554,7 +634,7 @@ function Diagnostico({
           Diagnóstico Completo
         </p>
         <h2 className="font-display mt-1 text-xl font-semibold text-foreground">
-          Sua Herança Mental está em {perfil.severidade}
+          {nome ? `${nome}, sua` : "Sua"} Herança Mental está em {perfil.severidade}
         </h2>
 
         <div className="mt-3 space-y-3 text-[15px] leading-relaxed text-foreground/85">
