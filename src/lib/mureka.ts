@@ -71,14 +71,14 @@ export function letraFrequenciaRiqueza(nome: string) {
   const n = (nome || "").trim().split(" ")[0] || "Você";
   // IMPORTANTE: as tags [pt-BR] e "Brazilian Portuguese" nas anotacoes reforcam pro
   // Mureka nao cair em espanhol ou portugues europeu (comum quando o prompt e' em ingles).
-  return `[Language: Brazilian Portuguese — pt-BR — sotaque brasileiro, NUNCA europeu, NUNCA espanhol]
-
-[Spoken intro — Brazilian Portuguese MALE voice, deep and warm, very slow, whispered/breathy, ASMR-like, like a father blessing]
+  // Letra limpa: SEM meta-tags (o Mureka cantava as instrucoes tecnicas em pt/es/etc).
+  // Sotaque/voz/estilo agora vao SO no prompt separado, nunca dentro da letra.
+  return `[Spoken intro]
 ${n}...
 ${n}, escuta.
 Essa mensagem é sua.
 
-[Verse — Brazilian Portuguese MALE voice, deep and calm, very slow, still almost whispered]
+[Verse]
 ${n},
 a herança que te prendia
 hoje se desfaz.
@@ -86,7 +86,7 @@ hoje se desfaz.
 Sua mente é sua,
 sua vida é sua.
 
-[Chorus — Brazilian Portuguese MALE voice, same deep tone, slightly warmer]
+[Chorus]
 ${n}, a frequência da riqueza
 já vive em você.
 Respire...
