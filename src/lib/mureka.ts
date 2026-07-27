@@ -46,7 +46,9 @@ export async function generateSong(args: GenerateArgs): Promise<MurekaTask> {
     body: JSON.stringify({
       lyrics: args.lyrics,
       prompt: args.prompt,
-      model: args.model ?? "mureka-6",
+      // 'auto' = pega o modelo mais novo (V9 hoje). mureka-6 estava dando qualidade
+      // de voz ruim. Se precisar forcar, pode passar 'mureka-o2' (music reasoning, melhor voz).
+      model: args.model ?? "auto",
     }),
   });
   const text = await res.text();
