@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import {
   Award, ArrowRight, Lock, Sparkles, ShieldCheck, Volume2, VolumeX, AlertTriangle,
@@ -30,22 +30,8 @@ export function Funnel() {
   const arquetipo: Arquetipo = answers.length >= QUIZ_QUESTIONS.length
     ? calcularArquetipo(answers)
     : "aprisionada"; // fallback antes do quiz terminar
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  const playTransition = useCallback(() => {
-    try {
-      if (!audioRef.current) {
-        audioRef.current = new Audio(
-          "https://hugomiyazakioriental.org/assets/transition-audio-DgTe1d2w.mp3"
-        );
-        audioRef.current.volume = 0.6;
-      }
-      audioRef.current.currentTime = 0;
-      void audioRef.current.play().catch(() => {});
-    } catch {
-      /* áudio é enfeite, nunca bloqueia o fluxo */
-    }
-  }, []);
+  // (playTransition foi REMOVIDO — o audio do site antigo Lovable ficava tocando
+  // ao clicar 'Quero remover essa heranca'. A Experiencia ja tem audios proprios do Hugo.)
 
   const selectGender = (g: "homem" | "mulher") => {
     setGenero(g);
@@ -56,7 +42,6 @@ export function Funnel() {
 
   const goToVideo = () => {
     track("funnel_diag_cta_click", { arquetipo });
-    playTransition();
     // depois do diagnostico vai pra EXPERIENCIA (ritual + musica + transicao)
     setStage("experiencia");
   };
