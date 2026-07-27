@@ -25,6 +25,8 @@ export function Funnel() {
   const [answers, setAnswers] = useState<string[]>([]);
   const [genero, setGenero] = useState<"homem" | "mulher" | null>(null);
   const [nome, setNome] = useState("");
+  const [musicaTaskId, setMusicaTaskId] = useState<string | null>(null);
+  const [musicaUrl, setMusicaUrl] = useState<string | null>(null);
   const arquetipo: Arquetipo = answers.length >= QUIZ_QUESTIONS.length
     ? calcularArquetipo(answers)
     : "aprisionada"; // fallback antes do quiz terminar
@@ -62,8 +64,55 @@ export function Funnel() {
     const clean = n.trim();
     setNome(clean);
     track("funnel_name_submit", { genero: genero ?? "", tem_nome: clean.length > 0 });
+    // dispara geracao da musica personalizada em BACKGROUND (nao trava o funil)
+    if (clean.length >= 2) {
+      void fetch("/api/musica/gerar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nome: clean }),
+      })
+        .then((r) => r.json())
+        .then((j: { taskId?: string; error?: string }) => {
+          if (j.taskId) {
+            setMusicaTaskId(j.taskId);
+            track("musica_gerar_dispatch", { taskId: j.taskId });
+          } else {
+            track("musica_gerar_erro", { erro: j.error ?? "sem_taskId" });
+          }
+        })
+        .catch(() => {
+          track("musica_gerar_erro", { erro: "fetch_failed" });
+        });
+    }
     setStage("loading");
   };
+
+  // polling do status da musica em background enquanto a pessoa passa por respiracao+diagnostico+bridge
+  useEffect(() => {
+    if (!musicaTaskId || musicaUrl) return;
+    let cancelled = false;
+    const poll = async () => {
+      try {
+        const r = await fetch(`/api/musica/status?id=${musicaTaskId}`);
+        const j: { url?: string; status?: string } = await r.json();
+        if (cancelled) return;
+        if (j.url) {
+          setMusicaUrl(j.url);
+          track("musica_pronta", { taskId: musicaTaskId });
+        } else if (j.status === "failed" || j.status === "cancelled") {
+          track("musica_falhou", { taskId: musicaTaskId, status: j.status });
+        }
+      } catch {
+        /* ignora erro pontual */
+      }
+    };
+    const iv = setInterval(poll, 5000);
+    void poll();
+    return () => {
+      cancelled = true;
+      clearInterval(iv);
+    };
+  }, [musicaTaskId, musicaUrl]);
 
   const answer = (key: string) => {
     const q = QUIZ_QUESTIONS[qIndex];
@@ -94,9 +143,15 @@ export function Funnel() {
         {stage === "nome" && <NameStep onSubmit={submitName} />}
         {stage === "loading" && <Loading onDone={() => setStage("diagnostico")} />}
         {stage === "diagnostico" && (
-          <Diagnostico onNext={goToVideo} arquetipo={arquetipo} answers={answers} nome={nome} />
+          <Diagnostico
+            onNext={goToVideo}
+            arquetipo={arquetipo}
+            answers={answers}
+            nome={nome}
+            musicaUrl={musicaUrl}
+          />
         )}
-        {stage === "bridge" && <Bridge onNext={() => setStage("vsl")} />}
+        {stage === "bridge" && <Bridge onNext={() => setStage("vsl")} musicaUrl={musicaUrl} />}
         {stage === "vsl" && <Vsl />}
       </div>
     </main>
@@ -456,17 +511,22 @@ function HugoProof() {
    Regra dos navegadores: áudio com som não pode dar autoplay. Começa no 1º gesto do usuário
    (scroll/toque/clique — sempre acontece ao ler), volume 0.35 com fade-in, loop, botão 🔊/🔇.
    Só renderiza o botão se o mp3 existir (onCanPlay). Pausa ao desmontar (ir pra VSL). */
-function DiagBgm() {
+function DiagBgm({ musicaUrl }: { musicaUrl?: string | null }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [available, setAvailable] = useState(false);
   const [playing, setPlaying] = useState(true);
+  const [usingPersonalized, setUsingPersonalized] = useState(false);
   const startedRef = useRef(false);
+  // fallback pra instrumental generica enquanto a musica personalizada nao chega
+  const src = musicaUrl || "/audio/diagnostico.mp3";
+  // loop so na generica; a musica personalizada tem letra e nao faz sentido em loop
+  const shouldLoop = !musicaUrl;
 
   useEffect(() => {
     const a = audioRef.current;
     if (!a) return;
     a.volume = 0;
-    const TARGET = 0.35;
+    const TARGET = 0.42;
     let fade: ReturnType<typeof setInterval> | undefined;
     const fadeIn = () => {
       fade = setInterval(() => {
@@ -494,6 +554,32 @@ function DiagBgm() {
     };
   }, []);
 
+  // quando a personalizada fica pronta: fade-out da atual, troca src, fade-in
+  useEffect(() => {
+    if (!musicaUrl || usingPersonalized) return;
+    const a = audioRef.current;
+    if (!a) return;
+    setUsingPersonalized(true);
+    const startVol = a.volume;
+    let step = 0;
+    const fadeOut = setInterval(() => {
+      step += 1;
+      a.volume = Math.max(0, startVol - step * 0.04);
+      if (a.volume <= 0) {
+        clearInterval(fadeOut);
+        a.src = musicaUrl;
+        a.loop = false;
+        a.currentTime = 0;
+        void a.play().catch(() => {});
+        const fadeIn = setInterval(() => {
+          a.volume = Math.min(0.55, a.volume + 0.04);
+          if (a.volume >= 0.55) clearInterval(fadeIn);
+        }, 100);
+      }
+    }, 80);
+    return () => clearInterval(fadeOut);
+  }, [musicaUrl, usingPersonalized]);
+
   const toggle = () => {
     const a = audioRef.current;
     if (!a) return;
@@ -511,8 +597,8 @@ function DiagBgm() {
     <>
       <audio
         ref={audioRef}
-        src="/audio/diagnostico.mp3"
-        loop
+        src={src}
+        loop={shouldLoop}
         preload="auto"
         onCanPlay={() => setAvailable(true)}
         onError={() => setAvailable(false)}
@@ -521,9 +607,16 @@ function DiagBgm() {
         <button
           onClick={toggle}
           aria-label={playing ? "Silenciar música" : "Ativar música"}
-          className="bg-navy-grad fixed bottom-4 right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full text-white shadow-elevated ring-1 ring-gold/50 transition hover:scale-105"
+          className={`fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-full px-4 py-3 text-white shadow-elevated ring-1 transition hover:scale-105 ${
+            usingPersonalized
+              ? "bg-gradient-to-r from-[#c2680f] to-[#e29638] ring-gold/70"
+              : "bg-navy-grad ring-gold/50"
+          }`}
         >
           {playing ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
+          {usingPersonalized && (
+            <span className="text-[10px] font-bold uppercase tracking-[0.14em]">Sua música</span>
+          )}
         </button>
       )}
     </>
@@ -536,11 +629,13 @@ function Diagnostico({
   arquetipo,
   answers,
   nome,
+  musicaUrl,
 }: {
   onNext: () => void;
   arquetipo: Arquetipo;
   answers: string[];
   nome: string;
+  musicaUrl?: string | null;
 }) {
   useEffect(() => {
     track("funnel_diag_view", { arquetipo });
@@ -552,7 +647,7 @@ function Diagnostico({
   const isSevero = perfil.severidadeCor === "vermelho";
   return (
     <>
-      <DiagBgm />
+      <DiagBgm musicaUrl={musicaUrl} />
       <section className="shadow-elevated ring-hairline overflow-hidden rounded-3xl bg-card">
       <div className="border-b border-border px-7 py-4">
         <Image
@@ -709,7 +804,7 @@ function Diagnostico({
 }
 
 /* ---------------- Bridge ---------------- */
-function Bridge({ onNext }: { onNext: () => void }) {
+function Bridge({ onNext, musicaUrl }: { onNext: () => void; musicaUrl?: string | null }) {
   const [left, setLeft] = useState(15);
   useEffect(() => {
     track("funnel_bridge_view");
@@ -723,7 +818,9 @@ function Bridge({ onNext }: { onNext: () => void }) {
   };
 
   return (
-    <section className="shadow-elevated ring-hairline rounded-3xl bg-card p-7">
+    <>
+      <DiagBgm musicaUrl={musicaUrl} />
+      <section className="shadow-elevated ring-hairline rounded-3xl bg-card p-7">
       <div className="flex justify-center">
         <Image
           src="/images/hms-logo-h.webp"
@@ -764,7 +861,8 @@ function Bridge({ onNext }: { onNext: () => void }) {
           </button>
         )}
       </div>
-    </section>
+      </section>
+    </>
   );
 }
 
