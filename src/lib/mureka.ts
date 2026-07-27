@@ -56,6 +56,15 @@ export async function generateSong(args: GenerateArgs): Promise<MurekaTask> {
   return JSON.parse(text) as MurekaTask;
 }
 
+export async function getBilling(): Promise<Record<string, unknown>> {
+  const res = await fetch(`${MUREKA_BASE}/account/billing`, {
+    headers: { Authorization: `Bearer ${apiKey()}` },
+  });
+  const text = await res.text();
+  if (!res.ok) throw new Error(`Mureka billing ${res.status}: ${text.slice(0, 500)}`);
+  return JSON.parse(text) as Record<string, unknown>;
+}
+
 export async function querySong(taskId: string): Promise<MurekaTask> {
   const res = await fetch(`${MUREKA_BASE}/song/query/${encodeURIComponent(taskId)}`, {
     headers: { Authorization: `Bearer ${apiKey()}` },
