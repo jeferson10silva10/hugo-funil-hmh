@@ -376,6 +376,84 @@ function HugoProof() {
   );
 }
 
+/* ---------------- Música de fundo do diagnóstico (autoplay-safe · para ao sair) ----------------
+   Regra dos navegadores: áudio com som não pode dar autoplay. Começa no 1º gesto do usuário
+   (scroll/toque/clique — sempre acontece ao ler), volume 0.35 com fade-in, loop, botão 🔊/🔇.
+   Só renderiza o botão se o mp3 existir (onCanPlay). Pausa ao desmontar (ir pra VSL). */
+function DiagBgm() {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [available, setAvailable] = useState(false);
+  const [playing, setPlaying] = useState(true);
+  const startedRef = useRef(false);
+
+  useEffect(() => {
+    const a = audioRef.current;
+    if (!a) return;
+    a.volume = 0;
+    const TARGET = 0.35;
+    let fade: ReturnType<typeof setInterval> | undefined;
+    const fadeIn = () => {
+      fade = setInterval(() => {
+        a.volume = Math.min(TARGET, a.volume + 0.03);
+        if (a.volume >= TARGET && fade) clearInterval(fade);
+      }, 120);
+    };
+    const start = () => {
+      if (startedRef.current) return;
+      const p = a.play();
+      if (p && typeof p.then === "function") {
+        p.then(() => {
+          startedRef.current = true;
+          setPlaying(true);
+          fadeIn();
+        }).catch(() => {});
+      }
+    };
+    const evs = ["pointerdown", "touchstart", "scroll", "keydown"] as const;
+    evs.forEach((ev) => window.addEventListener(ev, start, { once: true, passive: true }));
+    return () => {
+      evs.forEach((ev) => window.removeEventListener(ev, start));
+      if (fade) clearInterval(fade);
+      a.pause(); // para a música ao sair do diagnóstico (ir pra VSL)
+    };
+  }, []);
+
+  const toggle = () => {
+    const a = audioRef.current;
+    if (!a) return;
+    if (a.paused) {
+      startedRef.current = true;
+      void a.play().catch(() => {});
+      setPlaying(true);
+    } else {
+      a.pause();
+      setPlaying(false);
+    }
+  };
+
+  return (
+    <>
+      <audio
+        ref={audioRef}
+        src="/audio/diagnostico.mp3"
+        loop
+        preload="auto"
+        onCanPlay={() => setAvailable(true)}
+        onError={() => setAvailable(false)}
+      />
+      {available && (
+        <button
+          onClick={toggle}
+          aria-label={playing ? "Silenciar música" : "Ativar música"}
+          className="bg-navy-grad fixed bottom-4 right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full text-white shadow-elevated ring-1 ring-gold/50 transition hover:scale-105"
+        >
+          {playing ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
+        </button>
+      )}
+    </>
+  );
+}
+
 /* ---------------- Diagnóstico (adaptativo por arquétipo) ---------------- */
 function Diagnostico({
   onNext,
@@ -395,7 +473,9 @@ function Diagnostico({
   const citaAutoSacrificio = citarResposta(answers, 6);
   const isSevero = perfil.severidadeCor === "vermelho";
   return (
-    <section className="shadow-elevated ring-hairline overflow-hidden rounded-3xl bg-card">
+    <>
+      <DiagBgm />
+      <section className="shadow-elevated ring-hairline overflow-hidden rounded-3xl bg-card">
       <div className="border-b border-border px-7 py-4">
         <Image
           src="/images/hms-logo-h.webp"
@@ -543,7 +623,8 @@ function Diagnostico({
           Próximo passo: assistir ao Protocolo de Remoção
         </p>
       </div>
-    </section>
+      </section>
+    </>
   );
 }
 
