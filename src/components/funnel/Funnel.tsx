@@ -163,10 +163,6 @@ function Landing({ onSelectGender }: { onSelectGender: (g: "homem" | "mulher") =
       <h1 className="font-display mt-6 text-center text-[1.9rem] font-semibold leading-[1.1] tracking-tight text-foreground">
         Descubra qual <span className="text-gold-foil">Herança Mental</span> está te travando
       </h1>
-      <p className="mx-auto mt-2 max-w-sm text-center text-[14px] leading-relaxed text-muted-foreground">
-        Em 7 perguntas você descobre a programação que instalaram na sua mente antes dos 7 anos —
-        e o que fazer pra removê-la.
-      </p>
 
       {/* Escolha binária: o 1º toque JÁ inicia o quiz (reduz a fricção de começar) */}
       <p className="mt-6 text-center text-[13px] font-semibold uppercase tracking-[0.14em] text-gold">
