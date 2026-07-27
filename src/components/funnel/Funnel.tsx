@@ -955,7 +955,7 @@ function Experiencia({ nome, musicaUrl, onDone }: { nome: string; musicaUrl?: st
               onClick={start}
               className="hm-glow bg-gold-foil text-navy mt-7 flex w-full items-center justify-center gap-2 rounded-2xl px-7 py-4 text-base font-bold uppercase tracking-wide shadow-elevated transition active:scale-[0.98]"
             >
-              ✦ Estou pronto(a) — iniciar
+              ✦ Estou pronto — iniciar
             </button>
 
             <button
@@ -966,27 +966,34 @@ function Experiencia({ nome, musicaUrl, onDone }: { nome: string; musicaUrl?: st
             </button>
           </>
         ) : (
-          // TELA 2: rodando (olhos fechados)
+          // TELA 2: rodando (olhos fechados) — na fase 'musica' mostra DECRETOS rotativos
           <>
             <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-gold">
               {phase === "ritual" && "Instruções"}
-              {phase === "musica" && (musicaUrl ? "🎵 Sua frequência" : "✦ Preparando")}
+              {phase === "musica" && (musicaUrl ? "✦ Aceite" : "✦ Preparando")}
               {phase === "transicao" && "✦ Retornando"}
             </p>
-            <h2 className="font-display mt-4 text-[1.6rem] font-semibold leading-snug text-white">
-              {phase === "ritual" && "Feche os olhos e respire."}
-              {phase === "musica" && (musicaUrl ? `${displayName}, deixe a frequência agir.` : "Um momento…")}
-              {phase === "transicao" && "Respire. Volte com calma."}
-            </h2>
 
-            {/* pulsar visual — bolinha respirando */}
-            <div className="mt-10 flex justify-center">
-              <div className="hm-pulse relative flex h-32 w-32 items-center justify-center rounded-full border-2 border-gold/60">
-                <div className="hm-pulse absolute inset-2 rounded-full border border-gold/40" />
-                <div className="hm-pulse absolute inset-6 rounded-full bg-gold/15" />
-                <span className="text-3xl">✦</span>
-              </div>
-            </div>
+            {phase === "musica" && musicaUrl ? (
+              <DecretosAceite nome={displayName} />
+            ) : (
+              <>
+                <h2 className="font-display mt-4 text-[1.6rem] font-semibold leading-snug text-white">
+                  {phase === "ritual" && "Feche os olhos e respire."}
+                  {phase === "musica" && "Um momento…"}
+                  {phase === "transicao" && "Respire. Volte com calma."}
+                </h2>
+
+                {/* pulsar visual — bolinha respirando */}
+                <div className="mt-10 flex justify-center">
+                  <div className="hm-pulse relative flex h-32 w-32 items-center justify-center rounded-full border-2 border-gold/60">
+                    <div className="hm-pulse absolute inset-2 rounded-full border border-gold/40" />
+                    <div className="hm-pulse absolute inset-6 rounded-full bg-gold/15" />
+                    <span className="text-3xl">✦</span>
+                  </div>
+                </div>
+              </>
+            )}
 
             <p className="mt-10 text-xs text-white/45">
               o próximo passo aparece automaticamente
@@ -1001,6 +1008,62 @@ function Experiencia({ nome, musicaUrl, onDone }: { nome: string; musicaUrl?: st
         )}
       </section>
     </>
+  );
+}
+
+/* ---------------- DECRETOS DE ACEITE (rotativos durante a música) ----------------
+   Arquitetura de aceitação escalada: reparação -> alívio material -> merecimento ->
+   libertação -> presença -> permissão de receber -> morte simbólica da herança -> legado.
+   8 decretos × ~10s = ~80s (bate com a duração da música protagonista). */
+const DECRETOS = [
+  "Eu aceito viver o que eu não vivi.",
+  "Eu aceito que, daqui pra frente, o dinheiro não será mais problema.",
+  "Eu aceito que sou digno do que sempre pedi.",
+  "Eu aceito soltar tudo que não é meu.",
+  "Eu aceito que a minha nova vida já começou.",
+  "Eu aceito receber sem culpa.",
+  "Eu aceito que a herança antiga morre em mim aqui.",
+  "Eu aceito ser o primeiro da minha família a prosperar.",
+];
+
+function DecretosAceite({ nome }: { nome: string }) {
+  const [idx, setIdx] = useState(0);
+  const [visible, setVisible] = useState(true);
+  useEffect(() => {
+    // fade-out -> troca frase -> fade-in, a cada ~9.5s
+    const iv = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => {
+        setIdx((i) => (i + 1) % DECRETOS.length);
+        setVisible(true);
+      }, 800);
+    }, 9500);
+    return () => clearInterval(iv);
+  }, []);
+  void nome; // reservado pra variacao com nome no futuro se quisermos
+  return (
+    <div className="mt-6">
+      {/* bolinha menor no topo — sinal 'a musica continua' */}
+      <div className="flex justify-center">
+        <div className="hm-pulse relative flex h-16 w-16 items-center justify-center rounded-full border border-gold/50">
+          <div className="hm-pulse absolute inset-1 rounded-full bg-gold/15" />
+          <span className="text-xl">✦</span>
+        </div>
+      </div>
+      {/* decreto — grande, dourado, fade in/out */}
+      <div className="mt-8 flex min-h-[9rem] items-center justify-center px-2">
+        <p
+          className={`font-display text-[1.75rem] font-semibold leading-tight tracking-tight text-gold-foil transition-opacity duration-700 ${
+            visible ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          &ldquo;{DECRETOS[idx]}&rdquo;
+        </p>
+      </div>
+      <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/45">
+        {idx + 1} / {DECRETOS.length}
+      </p>
+    </div>
   );
 }
 
