@@ -71,12 +71,12 @@ export function letraFrequenciaRiqueza(nome: string) {
   // Mureka nao cair em espanhol ou portugues europeu (comum quando o prompt e' em ingles).
   return `[Language: Brazilian Portuguese — pt-BR — sotaque brasileiro, NUNCA europeu, NUNCA espanhol]
 
-[Spoken intro — Brazilian Portuguese, soft prayerful female voice, warm and slow, like a blessing before a hymn]
+[Spoken intro — Brazilian Portuguese MALE voice, deep and warm, very slow, whispered/breathy, ASMR-like, like a father blessing]
 ${n}...
 ${n}, escuta.
 Essa mensagem é sua.
 
-[Verse — Brazilian Portuguese, soft gospel worship voice, slow and gentle]
+[Verse — Brazilian Portuguese MALE voice, deep and calm, very slow, still almost whispered]
 ${n},
 a herança que te prendia
 hoje se desfaz.
@@ -84,7 +84,7 @@ hoje se desfaz.
 Sua mente é sua,
 sua vida é sua.
 
-[Chorus — Brazilian Portuguese, same voice, a little brighter and rising]
+[Chorus — Brazilian Portuguese MALE voice, same deep tone, slightly warmer]
 ${n}, a frequência da riqueza
 já vive em você.
 Respire...
@@ -94,4 +94,4 @@ você chegou em casa.`;
 /** Prompt de estilo padrão pra Mureka gerar no timbre certo.
  *  Trocamos ASMR sussurrado por adoração/gospel calmo (mais familiar pro publico 45+ do Hugo). */
 export const PROMPT_FREQUENCIA_RIQUEZA =
-  "BRAZILIAN PORTUGUESE VOCAL (pt-BR, Brazilian accent — NOT European Portuguese, NOT Spanish), gentle Brazilian gospel worship ballad, soft female vocal warm and prayerful with clear Brazilian pronunciation, opens with a spoken/almost-recited prayer intro before singing begins, slow tempo 60 bpm, acoustic piano and light strings, soft rain ambience in the background, peaceful and healing, 528hz feel, no drums, no percussion, no beat, comforting like a prayer";
+  "BRAZILIAN PORTUGUESE MALE VOCAL (pt-BR, Brazilian accent — NOT European Portuguese, NOT Spanish), deep warm male voice, whispered/breathy ASMR-like, VERY SLOW tempo around 50 bpm, ambient meditation with soft piano pad and gentle rain in the background, healing and peaceful like a father's blessing, 528hz feel, no drums, no percussion, no beat, sleep-friendly, contemplative and intimate, clear Brazilian pronunciation";
