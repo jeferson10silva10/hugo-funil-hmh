@@ -157,14 +157,14 @@ function Landing({ onSelectGender }: { onSelectGender: (g: "homem" | "mulher") =
       </p>
       <div className="mt-4 grid grid-cols-2 gap-4">
         {([
-          ["homem", "Homem", "0ms"],
-          ["mulher", "Mulher", "130ms"],
-        ] as const).map(([value, label, delay]) => (
+          ["homem", "Homem", "0ms", "bg-navy-grad"],
+          ["mulher", "Mulher", "130ms", "bg-gradient-to-br from-[#d94f8c] to-[#96285e]"],
+        ] as const).map(([value, label, delay, bg]) => (
           <button
             key={value}
             onClick={() => onSelectGender(value)}
             style={{ animationDelay: delay }}
-            className="hm-fade-up hm-shine group relative flex flex-col items-center gap-3 rounded-3xl bg-navy-grad p-6 shadow-elevated ring-1 ring-gold/40 transition-all duration-200 hover:-translate-y-1 hover:shadow-gold hover:ring-gold/80 active:scale-[0.98]"
+            className={`hm-fade-up hm-shine group relative flex flex-col items-center gap-3 rounded-3xl ${bg} p-6 shadow-elevated ring-1 ring-gold/40 transition-all duration-200 hover:-translate-y-1 hover:shadow-gold hover:ring-gold/80 active:scale-[0.98]`}
           >
             <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/12 ring-2 ring-gold/50 transition-transform duration-200 group-hover:scale-110">
               <User className="h-8 w-8 text-gold" strokeWidth={2} />
