@@ -147,42 +147,32 @@ function Landing({ onSelectGender }: { onSelectGender: (g: "homem" | "mulher") =
         <Award className="h-3.5 w-3.5" /> Diagnóstico Oriental
       </p>
 
-      <div className="mt-5 overflow-hidden rounded-2xl shadow-card">
-        <Image
-          src="/images/crianca-ouvidos-768.webp"
-          alt="Padrão familiar herdado"
-          width={768}
-          height={432}
-          className="h-auto w-full object-cover"
-          sizes="(max-width: 640px) 100vw, 768px"
-          priority
-          fetchPriority="high"
-        />
-      </div>
-
-      <h1 className="font-display mt-6 text-center text-[1.9rem] font-semibold leading-[1.1] tracking-tight text-foreground">
+      <h1 className="font-display mt-6 text-center text-[2.05rem] font-semibold leading-[1.08] tracking-tight text-foreground">
         Descubra qual <span className="text-gold-foil">Herança Mental</span> está te travando
       </h1>
 
       {/* Escolha binária: o 1º toque JÁ inicia o quiz (reduz a fricção de começar) */}
-      <p className="mt-6 text-center text-[13px] font-semibold uppercase tracking-[0.14em] text-gold">
-        Pra começar, me diz:
+      <p className="mt-7 text-center text-[13px] font-semibold uppercase tracking-[0.16em] text-gold">
+        Pra começar, me diz quem é você:
       </p>
-      <div className="mt-3 grid grid-cols-2 gap-3">
+      <div className="mt-4 grid grid-cols-2 gap-4">
         {([
-          ["homem", "Homem"],
-          ["mulher", "Mulher"],
-        ] as const).map(([value, label]) => (
+          ["homem", "Homem", "0ms"],
+          ["mulher", "Mulher", "130ms"],
+        ] as const).map(([value, label, delay]) => (
           <button
             key={value}
             onClick={() => onSelectGender(value)}
-            className="group flex flex-col items-center gap-2.5 rounded-2xl border-2 border-border/80 bg-card px-4 py-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-navy/40 hover:shadow-card active:scale-[0.98]"
+            style={{ animationDelay: delay }}
+            className="hm-fade-up hm-shine group relative flex flex-col items-center gap-3 rounded-3xl bg-navy-grad p-6 shadow-elevated ring-1 ring-gold/40 transition-all duration-200 hover:-translate-y-1 hover:shadow-gold hover:ring-gold/80 active:scale-[0.98]"
           >
-            <span className="bg-navy-grad flex h-14 w-14 items-center justify-center rounded-2xl text-white shadow-card transition-transform duration-200 group-hover:scale-105">
-              <User className="h-7 w-7" strokeWidth={1.9} />
+            <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/12 ring-2 ring-gold/50 transition-transform duration-200 group-hover:scale-110">
+              <User className="h-8 w-8 text-gold" strokeWidth={2} />
             </span>
-            <span className="text-base font-semibold uppercase tracking-wide text-foreground">
-              {label}
+            <span className="text-lg font-bold uppercase tracking-wider text-white">{label}</span>
+            <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.18em] text-gold/90">
+              Toque aqui
+              <ArrowRight className="h-3 w-3 transition-transform duration-200 group-hover:translate-x-0.5" />
             </span>
           </button>
         ))}
