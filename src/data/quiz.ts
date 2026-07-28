@@ -1,6 +1,6 @@
 // Dados do quiz HMH — adaptativo por peso semântico
 // Cada opção pesa em UM dos 3 arquétipos: escrava (E), aprisionada (P) ou adormecida (D).
-// O diagnóstico calcula o arquétipo dominante e monta o texto personalizado.
+// A analise calcula o arquetipo dominante e monta o texto personalizado.
 // Fonte da verdade: docs/research/FUNIL_SOURCE_OF_TRUTH.md
 
 export type Arquetipo = "escrava" | "aprisionada" | "adormecida";
@@ -84,14 +84,14 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
 ];
 
-/* ============ Perfil de diagnóstico por arquétipo ============ */
+/* ============ Perfil de analise por arquetipo ============ */
 export interface Perfil {
   arquetipo: Arquetipo;
   nomeCurto: string;             // "Mente Escrava" etc
-  severidade: string;            // "SEVERO", "SEVERO", "MODERADO"
+  severidade: string;            // "ALTO", "ALTO", "MEDIO"
   severidadeCor: "vermelho" | "laranja";
   grau: number;                  // 0-100 — grau de ativação (base; ajusta pela contagem depois)
-  frasesDor: string[];           // 4-6 sentenças "diagnóstico completo"
+  frasesDor: string[];           // 4-6 sentencas "analise completa"
   reframe: string;               // linha de acolhimento
   ganchoJapones: string;         // Ishin-Denshin ou variação — congruente com VSL
   prognostico: string;           // "se não remover em 6 meses..."
@@ -101,7 +101,7 @@ export const PERFIS: Record<Arquetipo, Perfil> = {
   escrava: {
     arquetipo: "escrava",
     nomeCurto: "Mente Escrava",
-    severidade: "ESTADO SEVERO",
+    severidade: "GRAU ALTO",
     severidadeCor: "vermelho",
     grau: 89,
     frasesDor: [
@@ -115,14 +115,14 @@ export const PERFIS: Record<Arquetipo, Perfil> = {
     reframe:
       "Isso NÃO é culpa sua. Você não escolheu se apagar — te ensinaram que se apagar é ser boa pessoa. E é exatamente por isso que dá pra reverter.",
     ganchoJapones:
-      "Na Medicina Oriental Japonesa, esse padrão tem nome: Ishin-Denshin (以心伝心) — a herança silenciosa que passa de geração em geração sem uma palavra. É isso que o Hugo remove no Protocolo.",
+      "Na Filosofia Oriental Japonesa, esse padrão tem nome: Ishin-Denshin (以心伝心) — a herança silenciosa que passa de geração em geração sem uma palavra. É isso que o Hugo remove no Método.",
     prognostico:
       "Se você não remover essa Herança nos próximos 6 meses, você vai continuar trabalhando 3× mais que os outros e recebendo metade. 2026 vai ser igual a 2025.",
   },
   aprisionada: {
     arquetipo: "aprisionada",
     nomeCurto: "Mente Aprisionada",
-    severidade: "ESTADO SEVERO",
+    severidade: "GRAU ALTO",
     severidadeCor: "vermelho",
     grau: 87,
     frasesDor: [
@@ -136,14 +136,14 @@ export const PERFIS: Record<Arquetipo, Perfil> = {
     reframe:
       "Isso NÃO é culpa sua. Você não escolheu essa programação — ela foi instalada quando você era criança, sem você perceber. E é exatamente por isso que dá pra remover.",
     ganchoJapones:
-      "Na Medicina Oriental Japonesa, esse padrão tem nome: Ishin-Denshin (以心伝心) — a transmissão silenciosa que passa de geração em geração. É isso que o Hugo remove no Protocolo.",
+      "Na Filosofia Oriental Japonesa, esse padrão tem nome: Ishin-Denshin (以心伝心) — a transmissão silenciosa que passa de geração em geração. É isso que o Hugo remove no Método.",
     prognostico:
       "Se você não remover essa Herança nos próximos 6 meses, 2026 vai ser igual a 2025. Que foi igual a 2024. E você sabe disso.",
   },
   adormecida: {
     arquetipo: "adormecida",
     nomeCurto: "Mente Adormecida",
-    severidade: "ESTADO MODERADO",
+    severidade: "GRAU MÉDIO",
     severidadeCor: "laranja",
     grau: 71,
     frasesDor: [
@@ -155,9 +155,9 @@ export const PERFIS: Record<Arquetipo, Perfil> = {
       "A boa notícia: sua Herança é a mais rápida de remover — porque você já está em movimento.",
     ],
     reframe:
-      "Isso NÃO é falta de vontade. Você tem — o que falta é liberar o freio. E o Protocolo do Hugo é exatamente sobre isso.",
+      "Isso NÃO é falta de vontade. Você tem — o que falta é liberar o freio. E o Método do Hugo é exatamente sobre isso.",
     ganchoJapones:
-      "Na Medicina Oriental Japonesa, esse padrão tem nome: Ishin-Denshin (以心伝心) — a herança silenciosa que passa de geração em geração. É isso que o Hugo remove no Protocolo.",
+      "Na Filosofia Oriental Japonesa, esse padrão tem nome: Ishin-Denshin (以心伝心) — a herança silenciosa que passa de geração em geração. É isso que o Hugo remove no Método.",
     prognostico:
       "Se você não remover essa Herança nos próximos 6 meses, o gap vai continuar crescendo. Em 3 anos, você olha pra trás e percebe que passou mais uma janela.",
   },
@@ -185,7 +185,7 @@ export function calcularArquetipo(answers: string[]): Arquetipo {
   return winner;
 }
 
-/** Recupera a citação literal da resposta escolhida — pra plantar no diagnóstico como prova. */
+/** Recupera a citacao literal da resposta escolhida — pra plantar na analise como prova. */
 export function citarResposta(answers: string[], qId: number): string | null {
   const q = QUIZ_QUESTIONS.find((x) => x.id === qId);
   if (!q) return null;

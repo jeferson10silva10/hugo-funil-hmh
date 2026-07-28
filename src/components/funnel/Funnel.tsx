@@ -125,7 +125,7 @@ export function Funnel() {
     } else {
       const finalArquetipo = calcularArquetipo(nextAnswers);
       track("funnel_quiz_complete", { arquetipo: finalArquetipo, total: nextAnswers.length, genero: genero ?? "" });
-      trackMeta("Lead", { content_name: "Diagnóstico HMH", arquetipo: finalArquetipo, genero: genero ?? "" });
+      trackMeta("Lead", { content_name: "Analise HMH", arquetipo: finalArquetipo, genero: genero ?? "" });
       setStage("nome");
     }
   };
@@ -211,7 +211,7 @@ function Landing({ onSelectGender }: { onSelectGender: (g: "homem" | "mulher") =
         priority
       />
       <p className="mx-auto mt-2 flex w-fit items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-gold">
-        <Award className="h-3.5 w-3.5" /> Diagnóstico Oriental
+        <Award className="h-3.5 w-3.5" /> Análise Oriental
       </p>
 
       <h1 className="font-display mt-6 text-center text-[2.05rem] font-semibold leading-[1.08] tracking-tight text-foreground">
@@ -353,7 +353,7 @@ function NameStep({ onSubmit }: { onSubmit: (n: string) => void }) {
         Como podemos te chamar?
       </h2>
       <p className="mx-auto mt-2 max-w-sm text-center text-[14px] leading-relaxed text-muted-foreground">
-        Seu diagnóstico é <strong className="text-foreground">personalizado com o seu nome</strong>.
+        Sua análise é <strong className="text-foreground">personalizada com o seu nome</strong>.
         É só o primeiro nome.
       </p>
 
@@ -375,14 +375,14 @@ function NameStep({ onSubmit }: { onSubmit: (n: string) => void }) {
       <div className="mt-5">
         {ready ? (
           <div className="hm-fade-up">
-            <PrimaryButton onClick={submit}>Ver meu diagnóstico</PrimaryButton>
+            <PrimaryButton onClick={submit}>Ver minha análise</PrimaryButton>
           </div>
         ) : (
           <button
             disabled
             className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-2xl bg-secondary px-7 py-4 text-base font-semibold uppercase tracking-wide text-muted-foreground"
           >
-            Ver meu diagnóstico
+            Ver minha análise
           </button>
         )}
       </div>
@@ -434,7 +434,7 @@ function Loading({ onDone }: { onDone: () => void }) {
           Respiração do Hara · Técnica dos Monges Zen
         </p>
         <h2 className="font-display mt-1 text-xl font-semibold text-white">
-          Respire comigo antes de ver seu diagnóstico
+          Respire comigo antes de ver sua análise
         </h2>
         <p className="mx-auto mt-2 max-w-[300px] text-[13px] leading-snug text-white/75">
           Mesma respiração que os monges zen usam há <strong className="text-white">800 anos</strong>{" "}
@@ -483,7 +483,7 @@ function Loading({ onDone }: { onDone: () => void }) {
           />
         </div>
         <p className="mt-2 text-sm font-semibold tabular-nums text-white/85">
-          {left > 0 ? `Seu prontuário em ${left}s` : "Pronto!"}
+          {left > 0 ? `Sua análise em ${left}s` : "Pronto!"}
         </p>
         <p className="mt-3 flex items-center gap-1.5 text-xs text-white/55">
           <Lock className="h-3.5 w-3.5" /> Suas respostas são completamente confidenciais
@@ -660,10 +660,10 @@ function Diagnostico({
           className="mx-auto h-auto w-full max-w-[260px]"
         />
       </div>
-      {/* Banner do diagnóstico — Mente Sabotadora × Mente Próspera */}
+      {/* Banner da analise — Mente Sabotadora × Mente Prospera */}
       <Image
         src="/images/diagnostico-banner.webp"
-        alt="Diagnóstico HMH — Mente Sabotadora versus Mente Próspera"
+        alt="Análise HMH — Mente Sabotadora versus Mente Próspera"
         width={1200}
         height={560}
         className="h-auto w-full"
@@ -671,7 +671,7 @@ function Diagnostico({
       />
       <div className="flex items-center justify-between border-b border-border px-7 py-3 text-[13px] text-muted-foreground">
         <span className="font-medium text-foreground/80">
-          {nome ? `Paciente: ${nome}` : `Data: ${date}`}
+          {nome ? `Nome: ${nome}` : `Data: ${date}`}
         </span>
         <span className="flex items-center gap-1 uppercase tracking-wide">
           <Lock className="h-3.5 w-3.5" /> Confidencial
@@ -692,7 +692,7 @@ function Diagnostico({
               : "bg-[#c2680f]/10 text-[#c2680f]"
           }`}
         >
-          <Lock className="h-3.5 w-3.5" /> Diagnóstico {isSevero ? "Severo" : "Moderado"}
+          <Lock className="h-3.5 w-3.5" /> Análise {isSevero ? "Grau Alto" : "Grau Médio"}
         </p>
 
         <p className="mt-5 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
@@ -728,7 +728,7 @@ function Diagnostico({
         <div className="my-6 h-px bg-border" />
 
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-          Diagnóstico Completo
+          Análise Completa
         </p>
         <h2 className="font-display mt-1 text-xl font-semibold text-foreground">
           {nome ? `${nome}, sua` : "Sua"} Herança Mental está em {perfil.severidade}
@@ -761,7 +761,7 @@ function Diagnostico({
           <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-destructive">
-              ⚠ Prognóstico sem intervenção
+              ⚠ Cenário sem mudança
             </p>
             <p className="mt-1.5 text-[15px] leading-relaxed text-foreground/90">
               {perfil.prognostico}
@@ -774,17 +774,17 @@ function Diagnostico({
           <p className="text-[15px] leading-relaxed text-foreground/85">{perfil.reframe}</p>
         </div>
 
-        {/* Ishin-Denshin — autoridade cultural japonesa (Medicina Oriental) */}
+        {/* Ishin-Denshin — autoridade cultural japonesa */}
         <div className="mt-5 rounded-2xl border border-gold/40 bg-navy-grad p-5 text-white">
           <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-gold">
-            🇯🇵 Medicina Oriental Japonesa
+            🇯🇵 Filosofia Oriental Japonesa
           </p>
           <p className="mt-2 text-[15px] leading-relaxed text-white/90">{perfil.ganchoJapones}</p>
         </div>
 
         <div className="mt-6 border-t border-border pt-5">
           <p className="font-display text-lg font-semibold text-foreground">Hugo Miyazaki</p>
-          <p className="text-sm text-muted-foreground">Mestre da Medicina Oriental</p>
+          <p className="text-sm text-muted-foreground">Mestre da Filosofia Oriental</p>
           <p className="text-sm text-muted-foreground">
             Premiado pelas Forças Internacionais da Paz / ONU
           </p>

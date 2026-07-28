@@ -21,9 +21,9 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: "Diagnóstico HMH: Descubra qual Herança Mental controla sua vida",
+  title: "Análise HMH: Descubra qual Herança Mental controla sua vida",
   description:
-    "Descubra em 6 perguntas qual Herança Mental herdada da sua família está sabotando suas decisões — e o que fazer para removê-la.",
+    "Descubra em 6 perguntas qual Herança Mental herdada da sua família está sabotando suas decisões — e como fazer para superá-la. Produto de desenvolvimento pessoal e autoconhecimento.",
 };
 
 export default function RootLayout({

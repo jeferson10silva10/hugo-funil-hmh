@@ -176,7 +176,7 @@ export function Vsl() {
           priority
         />
         <p className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-gold">
-          <Award className="h-3.5 w-3.5" /> Protocolo de Remoção · Premiado ONU
+          <Award className="h-3.5 w-3.5" /> Método Oriental · Premiado ONU
         </p>
       </div>
 
@@ -185,7 +185,7 @@ export function Vsl() {
         <div className="relative aspect-video w-full overflow-hidden bg-black sm:rounded-[calc(1rem-2px)]">
           <iframe
             src={PANDA_VSL_SRC}
-            title="Protocolo de Remoção"
+            title="Método Oriental"
             allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
             allowFullScreen
             className="absolute inset-0 h-full w-full border-0"
