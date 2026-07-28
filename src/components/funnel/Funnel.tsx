@@ -439,7 +439,7 @@ function Loading({ onDone }: { onDone: () => void }) {
         <p className="mx-auto mt-2 max-w-[300px] text-[13px] leading-snug text-white/75">
           Mesma respiração que os monges zen usam há <strong className="text-white">800 anos</strong>{" "}
           pra <strong className="text-gold">cortar o cortisol e destravar a mente</strong> —
-          comprovada por Harvard. É o ritual que o Hugo faz antes de cada atendimento.
+          comprovada por Harvard.
         </p>
       </div>
 
@@ -1127,9 +1127,18 @@ function Bridge({ onNext, nota }: { onNext: () => void; nota: number | null }) {
     track("funnel_bridge_cta_click");
     onNext();
   };
-  // (audio de validacao do Hugo aqui foi REMOVIDO — Hugo ja fala bastante na Experiencia+Calibracao;
-  // o `nota` continua sendo capturado no PostHog pra segmentar copy/CTAs no futuro se necessario)
-  void nota; // evita 'unused' warning; ja e usado no track do useEffect
+
+  // audio de validacao do Hugo: nota >=5 = forte ('voce sente a frequencia'), <5 = sutil
+  useEffect(() => {
+    if (nota === null) return;
+    const src = nota >= 5 ? "/audio/hugo/validacao-forte.mp3" : "/audio/hugo/validacao-sutil.mp3";
+    const a = new Audio(src);
+    a.volume = 0.95;
+    void a.play().catch(() => {}); // se navegador bloquear, ignora silenciosamente
+    return () => {
+      a.pause();
+    };
+  }, [nota]);
 
   return (
     <>

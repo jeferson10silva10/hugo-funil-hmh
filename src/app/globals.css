@@ -230,17 +230,17 @@
   pointer-events: none;
 }
 
-/* Decretos de aceite — cada palavra emerge do desfoque, sobe suave e fica.
-   Timing lento (1.5s) casa com a musica meditativa; blur inicial da vibe hipnotica. */
+/* Decretos de aceite — cada palavra emerge suave (fade + slide up).
+   Sem blur (bugava em alguns browsers com inline-block). Timing lento pra vibe mantra. */
 @keyframes decretoPalavraIn {
-  0%   { opacity: 0; transform: translateY(10px); filter: blur(8px); letter-spacing: 0.05em; }
-  60%  { opacity: 1; filter: blur(0); }
-  100% { opacity: 1; transform: translateY(0); filter: blur(0); letter-spacing: normal; }
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 .decreto-palavra {
+  display: inline-block;
   opacity: 0;
-  animation: decretoPalavraIn 1.5s cubic-bezier(0.22, 1, 0.36, 1) both;
-  will-change: opacity, transform, filter;
+  animation: decretoPalavraIn 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: opacity, transform;
 }
 
 @media (prefers-reduced-motion: reduce) {
