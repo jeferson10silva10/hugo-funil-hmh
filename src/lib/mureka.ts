@@ -106,7 +106,20 @@ Recebe o que vem.
 ${n}, a frequência da riqueza
 já vive em você.
 Respire...
-chegou a sua vez.`;
+chegou a sua vez.
+
+[Outro — repete o nome e ancora prosperidade/sucesso/aceitação]
+${n}, você aceita.
+${n}, você recebe.
+${n}, você prospera.
+
+O sucesso é seu, ${n}.
+A abundância é sua.
+A nova vida é sua.
+
+${n}...
+${n}...
+${n}, chegou a sua vez.`;
 }
 
 /** Prompt de estilo padrão pra Mureka gerar no timbre certo.

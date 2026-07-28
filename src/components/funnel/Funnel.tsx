@@ -844,10 +844,11 @@ function Experiencia({ nome, musicaUrl, onDone }: { nome: string; musicaUrl?: st
     const m = musicaRef.current;
     if (!v) return;
     if (phase === "ritual") {
-      // musica de fundo baixinha (0.28) + voz Hugo protagonista (0.9)
-      if (m) m.volume = 0.28;
+      // musica de fundo agora um pouco mais audivel (0.38) porque o novo audio ritual e' mais baixo
+      // voz Hugo em 1.0 (volume total do arquivo, que ja e' baixo)
+      if (m) m.volume = 0.38;
       v.src = "/audio/hugo/ritual.mp3";
-      v.volume = 0.95;
+      v.volume = 1.0;
       void v.play().catch(() => setPhase("musica"));
       v.onended = () => setPhase("musica");
     } else if (phase === "musica") {
