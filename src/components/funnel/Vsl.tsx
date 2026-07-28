@@ -109,14 +109,16 @@ function Countdown() {
 }
 
 const GIFTS = [
-  { title: "Bônus 1: Treinamento Heranças da Mentalidade de Sucesso", value: "R$497" },
-  { title: "Bônus 2: Katsu Desafio — Resultado em 5 Dias", value: "R$197" },
+  { title: "Bônus 1: Katsu Desafio — Resultado em 5 Dias", value: "R$197" },
+  { title: "Bônus 2: Curso HMH gravado — Acesso Vitalício", value: "R$497" },
+  { title: "Bônus 3: Sua Música Angelical da Frequência da Prosperidade", value: "R$97" },
 ];
 
 const LOTE1_ITEMS = [
-  { bold: "2 sessões AO VIVO", rest: " — Sábado 01/08 (9h30–17h30) + Domingo 02/08 (15h–18h)" },
-  { bold: "", rest: "Bônus 1: Treinamento Heranças da Mentalidade de Sucesso" },
-  { bold: "Bônus 2:", rest: " Katsu Desafio — Resultado em 5 Dias (gravado no Hotmart)" },
+  { bold: "Imersão HMH — 2 dias AO VIVO", rest: " · Sábado 01/08 (9h30–17h30) + Domingo 02/08 (15h–18h)" },
+  { bold: "Bônus 1:", rest: " Katsu Desafio — resultado em 5 dias (gravado no Hotmart)" },
+  { bold: "Bônus 2:", rest: " Curso HMH gravado — acesso vitalício (rever quantas vezes quiser)" },
+  { bold: "Bônus 3:", rest: " Sua Música Angelical da Frequência da Prosperidade (personalizada com seu nome, 528Hz)" },
   { bold: "", rest: "Grupo VIP no WhatsApp" },
   { bold: "", rest: "Reunião tira-dúvidas com Hugo Miyazaki" },
 ];
@@ -201,7 +203,8 @@ export function Vsl() {
         </p>
         <div className="mt-3 space-y-3">
           {GIFTS.map((g, i) => {
-            const unlocked = i === 0 ? gift1 : offerOpen;
+            // Bonus 1 e 2 liberam no primeiro gatilho; Bonus 3 (musica) libera com a oferta
+            const unlocked = i < 2 ? gift1 : offerOpen;
             if (unlocked) {
               return (
                 <div
@@ -294,11 +297,13 @@ export function Vsl() {
           A Oferta Completa
         </p>
         <h2 className="font-display mt-1 text-[1.7rem] font-semibold leading-tight tracking-tight text-foreground">
-          Acesso à Imersão + 2 Treinamentos Exclusivos que valem R$ 694
+          Acesso à Imersão + 3 Bônus Exclusivos que valem <span className="text-gold-foil">R$ 791</span>
         </h2>
         <p className="mx-auto mt-2 max-w-sm text-[15px] text-muted-foreground">
           A Imersão é o <strong className="text-foreground">workshop online ao vivo</strong> que o
-          Hugo mostrou no vídeo — com ele te ajudando pessoalmente a remover a sua Herança.
+          Hugo mostrou no vídeo — com ele te ajudando pessoalmente a remover a sua Herança —
+          <strong className="text-foreground"> mais o curso pra rever quando quiser</strong> e a
+          <strong className="text-foreground"> sua música personalizada</strong>.
         </p>
       </div>
 
