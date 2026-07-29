@@ -53,6 +53,8 @@ export async function GET(req: Request) {
       valor: venda.valor ?? 0,
       recebidoEm: venda.recebidoEm ?? null,
       temErro: !!venda.murekaErro,
+      // Debug: expor mensagem do erro Mureka enquanto testamos
+      murekaErro: venda.murekaErro ?? null,
     });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "erro desconhecido";
