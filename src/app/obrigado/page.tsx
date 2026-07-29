@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import {
@@ -14,19 +14,28 @@ import {
   GraduationCap,
   AlertTriangle,
   ExternalLink,
+  Loader2,
 } from "lucide-react";
 import { track, trackMeta } from "@/lib/analytics";
 
 const GRUPO_VIP_URL = "https://www.redirectmais.com/sun/gruposvip";
 const HOTMART_PLATAFORMA_URL = "https://hotmart.com/pt-br/club/herdeiros-do-sucesso/";
+const MUSICA_FALLBACK_SRC = "/audio/diagnostico.mp3";
 
 /**
  * Página de obrigado — hierarquia:
  * 1. PASSO 1 (CRÍTICO): Grupo VIP — é onde acontece a Imersão
  * 2. PASSO 2: Cursos gravados na plataforma Hotmart
- * 3. PASSO 3: Bônus Música da Frequência da Riqueza
+ * 3. PASSO 3: Bônus Música da Frequência da Riqueza (personalizada via webhook Hotmart)
  *
- * Também dispara Meta Pixel Purchase com dedupe por transaction do Hotmart.
+ * Fluxo da música personalizada:
+ *   - Hotmart POST /api/hotmart/webhook → gera Mureka + grava no KV
+ *   - Esta página lê ?transaction=X do redirect
+ *   - Consulta /api/venda/status?transaction=X pra pegar nome + murekaTaskId
+ *   - Faz polling em /api/musica/status?id=X até URL do MP3 estar pronta
+ *   - Fallback: música genérica se webhook não chegou / erro Mureka
+ *
+ * Também dispara Meta Pixel Purchase com dedupe por transaction.
  */
 export default function ObrigadoPage() {
   return (
@@ -39,15 +48,16 @@ export default function ObrigadoPage() {
 function ObrigadoInner() {
   const sp = useSearchParams();
   const nomeParam = (sp.get("nome") || "").trim();
-  const nome = nomeParam ? nomeParam.split(" ")[0] : "";
+  const nomeFromUrl = nomeParam ? nomeParam.split(" ")[0] : "";
   const transaction = (sp.get("transaction") || "").trim();
   const valorParam = Number(sp.get("valor") || "77");
   const valor = Number.isFinite(valorParam) && valorParam > 0 ? valorParam : 77;
 
-  const musicaSrc = "/audio/diagnostico.mp3";
+  // Nome que aparece no header — prioridade: KV (webhook) > URL > vazio
+  const [nomeConfirmado, setNomeConfirmado] = useState<string>(nomeFromUrl);
 
   useEffect(() => {
-    track("obrigado_view", { tem_nome: nome.length > 0, tem_transaction: !!transaction });
+    track("obrigado_view", { tem_nome: nomeFromUrl.length > 0, tem_transaction: !!transaction });
 
     if (typeof window === "undefined") return;
     const key = `hmh_purchase_fired_${transaction || "notrans"}`;
@@ -64,7 +74,9 @@ function ObrigadoInner() {
     });
 
     if (transaction) window.localStorage.setItem(key, "1");
-  }, [nome, transaction, valor]);
+  }, [nomeFromUrl, transaction, valor]);
+
+  const nomeHeader = nomeConfirmado || nomeFromUrl;
 
   return (
     <main className="min-h-dvh w-full bg-background pb-16">
@@ -82,7 +94,7 @@ function ObrigadoInner() {
             <Sparkles className="h-3.5 w-3.5" /> Compra confirmada
           </p>
           <h1 className="font-display mt-3 text-3xl font-semibold leading-tight text-foreground sm:text-4xl">
-            {nome ? `Bem-vindo(a), ${nome}!` : "Bem-vindo(a) à Imersão HMH!"}
+            {nomeHeader ? `Bem-vindo(a), ${nomeHeader}!` : "Bem-vindo(a) à Imersão HMH!"}
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
             Sua vaga está garantida. Agora siga os 3 passos abaixo — nessa ordem.
@@ -137,7 +149,10 @@ function ObrigadoInner() {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() =>
-                track("obrigado_grupo_vip_click", { nome, tem_transaction: !!transaction })
+                track("obrigado_grupo_vip_click", {
+                  nome: nomeHeader,
+                  tem_transaction: !!transaction,
+                })
               }
               className="hm-pulse mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-6 py-4 text-center text-base font-bold uppercase tracking-wide text-white shadow-elevated hover:bg-emerald-700 active:scale-[.99]"
             >
@@ -199,7 +214,7 @@ function ObrigadoInner() {
               href={HOTMART_PLATAFORMA_URL}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() => track("obrigado_plataforma_click", { nome })}
+              onClick={() => track("obrigado_plataforma_click", { nome: nomeHeader })}
               className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-navy px-6 py-3.5 text-center text-sm font-bold uppercase tracking-wide text-white ring-1 ring-gold/40 hover:bg-navy/90 active:scale-[.99]"
             >
               Acessar meus cursos na plataforma
@@ -215,34 +230,11 @@ function ObrigadoInner() {
 
         {/* PASSO 3 — MÚSICA BÔNUS */}
         <section className="shadow-elevated ring-hairline mt-6 overflow-hidden rounded-3xl bg-card">
-          <div className="bg-navy-grad px-6 py-4 text-center text-white">
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gold">
-              🎁 Passo 3 · Bônus exclusivo
-            </p>
-            <h2 className="font-display mt-1 text-xl font-semibold leading-tight sm:text-2xl">
-              Sua Música da{" "}
-              <span className="text-gold-foil">Frequência da Riqueza</span>
-            </h2>
-            <p className="mt-2 text-sm leading-relaxed text-white/85">
-              Criada {nome ? `pra você, ${nome}` : "pra você"}, em frequência 528Hz — a
-              frequência da abundância. Ouça toda manhã por 21 dias.
-            </p>
-          </div>
-
-          <div className="px-6 py-6 sm:px-7">
-            <MusicPlayer src={musicaSrc} nome={nome} />
-
-            <div className="mt-5 rounded-2xl border border-gold/30 bg-gold/5 p-4">
-              <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-gold">
-                <Music className="h-3.5 w-3.5" /> Como usar
-              </p>
-              <ul className="mt-2 space-y-1.5 text-[13px] leading-relaxed text-foreground/85">
-                <li>· Ouça pela manhã, logo ao acordar</li>
-                <li>· Fone de ouvido intensifica o efeito</li>
-                <li>· 21 dias seguidos = ciclo de reprogramação</li>
-              </ul>
-            </div>
-          </div>
+          <MusicaSection
+            transaction={transaction}
+            nomeFromUrl={nomeFromUrl}
+            onNomeConfirmado={setNomeConfirmado}
+          />
         </section>
 
         {/* Rodapé — garantia */}
@@ -257,6 +249,210 @@ function ObrigadoInner() {
         </section>
       </div>
     </main>
+  );
+}
+
+/* =========================================================
+   MÚSICA — busca dados da venda + polling Mureka
+   ========================================================= */
+
+type MusicaEstado =
+  | { kind: "idle" }
+  | { kind: "fetching_venda" }
+  | { kind: "aguardando_webhook"; retries: number }
+  | { kind: "gerando_musica"; nome: string; taskId: string }
+  | { kind: "pronta"; nome: string; url: string }
+  | { kind: "fallback"; motivo: string };
+
+function MusicaSection({
+  transaction,
+  nomeFromUrl,
+  onNomeConfirmado,
+}: {
+  transaction: string;
+  nomeFromUrl: string;
+  onNomeConfirmado: (nome: string) => void;
+}) {
+  const [estado, setEstado] = useState<MusicaEstado>(
+    transaction ? { kind: "fetching_venda" } : { kind: "fallback", motivo: "sem_transaction" }
+  );
+  const cancelado = useRef(false);
+
+  useEffect(() => {
+    cancelado.current = false;
+    if (!transaction) return;
+    let vendaRetryTimer: ReturnType<typeof setTimeout> | null = null;
+    let musicaPollTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const buscarVenda = async (tentativa: number) => {
+      if (cancelado.current) return;
+      try {
+        const r = await fetch(
+          `/api/venda/status?transaction=${encodeURIComponent(transaction)}`,
+          { cache: "no-store" }
+        );
+
+        if (r.status === 404) {
+          // Webhook ainda não processou — retry
+          if (tentativa >= 12) {
+            // ~2 min de retry, desiste
+            setEstado({ kind: "fallback", motivo: "webhook_nao_chegou" });
+            return;
+          }
+          setEstado({ kind: "aguardando_webhook", retries: tentativa });
+          vendaRetryTimer = setTimeout(() => buscarVenda(tentativa + 1), 10_000);
+          return;
+        }
+
+        if (!r.ok) {
+          setEstado({ kind: "fallback", motivo: `status_${r.status}` });
+          return;
+        }
+
+        const data = (await r.json()) as {
+          primeiroNome?: string;
+          murekaTaskId?: string | null;
+          temErro?: boolean;
+        };
+
+        const nome = data.primeiroNome || nomeFromUrl || "";
+        if (nome) onNomeConfirmado(nome);
+
+        if (!data.murekaTaskId || data.temErro) {
+          setEstado({ kind: "fallback", motivo: "sem_task_mureka" });
+          return;
+        }
+
+        setEstado({ kind: "gerando_musica", nome, taskId: data.murekaTaskId });
+        pollMusica(data.murekaTaskId, nome, 0);
+      } catch {
+        setEstado({ kind: "fallback", motivo: "erro_fetch_venda" });
+      }
+    };
+
+    const pollMusica = async (taskId: string, nome: string, tentativa: number) => {
+      if (cancelado.current) return;
+      try {
+        const r = await fetch(`/api/musica/status?id=${encodeURIComponent(taskId)}`, {
+          cache: "no-store",
+        });
+        if (!r.ok) {
+          if (tentativa >= 40) {
+            setEstado({ kind: "fallback", motivo: "mureka_timeout" });
+            return;
+          }
+          musicaPollTimer = setTimeout(() => pollMusica(taskId, nome, tentativa + 1), 4_000);
+          return;
+        }
+        const data = (await r.json()) as {
+          status?: string;
+          url?: string | null;
+          failed_reason?: string | null;
+        };
+        if (data.url) {
+          setEstado({ kind: "pronta", nome, url: data.url });
+          track("obrigado_musica_pronta", { nome });
+          return;
+        }
+        if (data.status === "failed" || data.status === "cancelled") {
+          setEstado({ kind: "fallback", motivo: `mureka_${data.status}` });
+          return;
+        }
+        if (tentativa >= 40) {
+          setEstado({ kind: "fallback", motivo: "mureka_timeout" });
+          return;
+        }
+        musicaPollTimer = setTimeout(() => pollMusica(taskId, nome, tentativa + 1), 4_000);
+      } catch {
+        if (tentativa >= 40) {
+          setEstado({ kind: "fallback", motivo: "erro_poll_mureka" });
+          return;
+        }
+        musicaPollTimer = setTimeout(() => pollMusica(taskId, nome, tentativa + 1), 4_000);
+      }
+    };
+
+    buscarVenda(0);
+
+    return () => {
+      cancelado.current = true;
+      if (vendaRetryTimer) clearTimeout(vendaRetryTimer);
+      if (musicaPollTimer) clearTimeout(musicaPollTimer);
+    };
+  }, [transaction, nomeFromUrl, onNomeConfirmado]);
+
+  return (
+    <>
+      <div className="bg-navy-grad px-6 py-4 text-center text-white">
+        <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gold">
+          🎁 Passo 3 · Bônus exclusivo
+        </p>
+        <h2 className="font-display mt-1 text-xl font-semibold leading-tight sm:text-2xl">
+          Sua Música da{" "}
+          <span className="text-gold-foil">Frequência da Riqueza</span>
+        </h2>
+        <p className="mt-2 text-sm leading-relaxed text-white/85">
+          Criada especialmente pra você, em frequência 528Hz — a frequência da abundância.
+          Ouça toda manhã por 21 dias.
+        </p>
+      </div>
+
+      <div className="px-6 py-6 sm:px-7">
+        {renderMusicaEstado(estado)}
+
+        <div className="mt-5 rounded-2xl border border-gold/30 bg-gold/5 p-4">
+          <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-gold">
+            <Music className="h-3.5 w-3.5" /> Como usar
+          </p>
+          <ul className="mt-2 space-y-1.5 text-[13px] leading-relaxed text-foreground/85">
+            <li>· Ouça pela manhã, logo ao acordar</li>
+            <li>· Fone de ouvido intensifica o efeito</li>
+            <li>· 21 dias seguidos = ciclo de reprogramação</li>
+          </ul>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function renderMusicaEstado(estado: MusicaEstado) {
+  if (estado.kind === "fetching_venda") {
+    return <LoadingMusica label="Localizando sua compra..." />;
+  }
+  if (estado.kind === "aguardando_webhook") {
+    return (
+      <LoadingMusica
+        label={
+          estado.retries === 0
+            ? "Preparando sua música personalizada..."
+            : `Ainda preparando... (${estado.retries + 1})`
+        }
+      />
+    );
+  }
+  if (estado.kind === "gerando_musica") {
+    return (
+      <LoadingMusica
+        label={`Compondo a música pra você, ${estado.nome}... isso leva 1–2 min`}
+      />
+    );
+  }
+  if (estado.kind === "pronta") {
+    return <MusicPlayer src={estado.url} nome={estado.nome} />;
+  }
+  // fallback
+  return <MusicPlayer src={MUSICA_FALLBACK_SRC} nome="" />;
+}
+
+function LoadingMusica({ label }: { label: string }) {
+  return (
+    <div className="hm-glow flex flex-col items-center gap-3 rounded-3xl border-2 border-gold/40 bg-navy-grad p-8 text-white">
+      <Loader2 className="h-10 w-10 animate-spin text-gold" />
+      <p className="text-center text-sm font-semibold leading-relaxed">{label}</p>
+      <p className="text-center text-[11px] text-white/60">
+        Não feche a página — a música aparece aqui em instantes.
+      </p>
+    </div>
   );
 }
 
