@@ -318,13 +318,41 @@ function MusicaSection({
         const nome = data.primeiroNome || nomeFromUrl || "";
         if (nome) onNomeConfirmado(nome);
 
-        if (!data.murekaTaskId || data.temErro) {
-          setEstado({ kind: "fallback", motivo: "sem_task_mureka" });
+        // Webhook conseguiu gerar Mureka → só faz polling
+        if (data.murekaTaskId && !data.temErro) {
+          setEstado({ kind: "gerando_musica", nome, taskId: data.murekaTaskId });
+          pollMusica(data.murekaTaskId, nome, 0);
           return;
         }
 
-        setEstado({ kind: "gerando_musica", nome, taskId: data.murekaTaskId });
-        pollMusica(data.murekaTaskId, nome, 0);
+        // Webhook falhou (rate limit ou erro) → tenta gerar aqui on-demand
+        if (nome && nome.length >= 2) {
+          setEstado({ kind: "gerando_musica", nome, taskId: "" });
+          try {
+            const gr = await fetch("/api/musica/gerar", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ nome }),
+              cache: "no-store",
+            });
+            if (!gr.ok) {
+              setEstado({ kind: "fallback", motivo: `gerar_${gr.status}` });
+              return;
+            }
+            const gdata = (await gr.json()) as { taskId?: string };
+            if (gdata.taskId) {
+              setEstado({ kind: "gerando_musica", nome, taskId: gdata.taskId });
+              pollMusica(gdata.taskId, nome, 0);
+            } else {
+              setEstado({ kind: "fallback", motivo: "sem_task_mureka" });
+            }
+          } catch {
+            setEstado({ kind: "fallback", motivo: "erro_gerar_ondemand" });
+          }
+          return;
+        }
+
+        setEstado({ kind: "fallback", motivo: "sem_nome" });
       } catch {
         setEstado({ kind: "fallback", motivo: "erro_fetch_venda" });
       }
