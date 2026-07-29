@@ -20,7 +20,7 @@ const INCLUSOS = [
 const FAQ = [
   {
     q: "Posso parcelar?",
-    a: "Sim. Você pode parcelar em até 12x de R$59,58 no cartão de crédito. Ou R$597 à vista com 10% de desconto.",
+    a: "Sim. Você pode parcelar em até 12x de R$49,70 no cartão de crédito. Ou R$497 à vista.",
   },
   {
     q: "Quando começam as mentorias ao vivo?",
@@ -47,7 +47,7 @@ export default function UpsellPage() {
       content_ids: ["mentoria-express-trava-enraizada"],
       content_name: "Mentoria Express - Trava Enraizada",
       content_type: "product",
-      value: 597,
+      value: 497,
       currency: "BRL",
     });
   }, []);
@@ -132,10 +132,10 @@ export default function UpsellPage() {
                   Hoje, pra quem assistiu até aqui:
                 </p>
                 <p className="font-display mt-2 text-4xl font-bold text-emerald-600 sm:text-5xl">
-                  12x R$ 59,58
+                  12x R$ 49,70
                 </p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  ou <strong className="text-foreground">R$ 597 à vista</strong> (10% de desconto)
+                  ou <strong className="text-foreground">R$ 497 à vista</strong>
                 </p>
                 <p className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-red-500/10 px-3 py-1.5 text-xs font-bold text-red-600">
                   <Clock className="h-3.5 w-3.5" /> Apenas 14 vagas — se esgotando
@@ -210,7 +210,7 @@ function HotmartFunnelInit() {
           track("upsell_widget_mounted");
           trackMeta("AddToCart", {
             content_ids: ["mentoria-express-trava-enraizada"],
-            value: 597,
+            value: 497,
             currency: "BRL",
           });
           return;
