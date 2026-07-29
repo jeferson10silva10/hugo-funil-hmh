@@ -86,37 +86,88 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+/* ============ BUFFER DE EVENTOS ============
+   Analytics carrega lazy (requestIdleCallback ~1.8s depois do paint) pra nao
+   travar LCP. Eventos disparados ANTES do PostHog/Pixel carregarem eram
+   perdidos silenciosamente — isso quebrava trackMeta("Purchase") na /obrigado
+   quando a pessoa cai da Hotmart, useEffect roda no primeiro paint, PostHog/Pixel
+   ainda nao estao prontos.
+   Solucao: enfileira separadamente por destino, drena assim que cada um carrega.
+*/
+type PendingEvent = { kind: "custom" | "standard"; event: string; props: EventProps };
+const posthogQueue: PendingEvent[] = [];
+const pixelQueue: PendingEvent[] = [];
+let flushScheduled = false;
+let flushTimer: ReturnType<typeof setTimeout> | null = null;
+
+function attemptFlush() {
+  if (typeof window === "undefined") return;
+  const posthogReady = !!POSTHOG_KEY && !!posthog.__loaded;
+  const fbqReady = !!META_PIXEL_ID && !!window.fbq;
+
+  if (posthogReady) {
+    while (posthogQueue.length > 0) {
+      const ev = posthogQueue.shift()!;
+      const name = ev.kind === "custom" ? ev.event : `meta_${ev.event}`;
+      try {
+        posthog.capture(name, ev.props);
+      } catch {}
+    }
+  }
+  if (fbqReady) {
+    while (pixelQueue.length > 0) {
+      const ev = pixelQueue.shift()!;
+      const method = ev.kind === "custom" ? "trackCustom" : "track";
+      try {
+        window.fbq!(method, ev.event, ev.props);
+      } catch {}
+    }
+  }
+
+  const stillPending = posthogQueue.length > 0 || pixelQueue.length > 0;
+  if (stillPending) {
+    if (flushTimer) clearTimeout(flushTimer);
+    flushTimer = setTimeout(attemptFlush, 500);
+  } else {
+    flushScheduled = false;
+    if (flushTimer) {
+      clearTimeout(flushTimer);
+      flushTimer = null;
+    }
+  }
+}
+
+function scheduleFlush() {
+  if (flushScheduled) return;
+  flushScheduled = true;
+  attemptFlush();
+}
+
 /* ============ TRACK unificado ============
    Uso: track("funnel_quiz_answer", { qId: 3, key: "A", arquetipo: "escrava" });
    Envia pra PostHog (evento custom + prop) E pro Meta Pixel (trackCustom).
-   Eventos padrão da Meta (PageView, Lead, InitiateCheckout etc.) usam a helper `trackMeta`.
+   Eventos padrao da Meta (PageView, Lead, InitiateCheckout etc.) usam a helper `trackMeta`.
 */
 export function track(event: string, props: EventProps = {}) {
   if (typeof window === "undefined") return;
-  // PostHog
-  if (POSTHOG_KEY && posthog.__loaded) {
-    posthog.capture(event, props);
-  }
-  // Meta Pixel — evento custom (não é standard)
-  if (META_PIXEL_ID && window.fbq) {
-    window.fbq("trackCustom", event, props);
-  }
-  // Console (dev)
+  if (POSTHOG_KEY) posthogQueue.push({ kind: "custom", event, props });
+  if (META_PIXEL_ID) pixelQueue.push({ kind: "custom", event, props });
+  scheduleFlush();
   if (process.env.NODE_ENV === "development") {
     // eslint-disable-next-line no-console
     console.log("[track]", event, props);
   }
 }
 
-/** Dispara um evento PADRÃO da Meta (PageView, Lead, InitiateCheckout, Purchase, etc.) */
+/** Dispara um evento PADRAO da Meta (PageView, Lead, InitiateCheckout, Purchase, etc.) */
 export function trackMeta(standardEvent: string, props: EventProps = {}) {
   if (typeof window === "undefined") return;
-  if (META_PIXEL_ID && window.fbq) {
-    window.fbq("track", standardEvent, props);
-  }
-  // também manda pro PostHog pra ter tudo num painel só
-  if (POSTHOG_KEY && posthog.__loaded) {
-    posthog.capture(`meta_${standardEvent}`, props);
+  if (META_PIXEL_ID) pixelQueue.push({ kind: "standard", event: standardEvent, props });
+  if (POSTHOG_KEY) posthogQueue.push({ kind: "standard", event: standardEvent, props });
+  scheduleFlush();
+  if (process.env.NODE_ENV === "development") {
+    // eslint-disable-next-line no-console
+    console.log("[trackMeta]", standardEvent, props);
   }
 }
 
