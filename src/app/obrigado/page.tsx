@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { Download, Volume2, VolumeX, Sparkles, ShieldCheck, Music } from "lucide-react";
-import { track } from "@/lib/analytics";
+import { track, trackMeta } from "@/lib/analytics";
 
 /** Página de obrigado — bônus "Música Angelical da Frequência da Riqueza"
  *  V1 (teste): usa a trilha genérica em /audio/diagnostico.mp3 como placeholder.
@@ -21,12 +21,36 @@ function ObrigadoInner() {
   const sp = useSearchParams();
   const nomeParam = (sp.get("nome") || "").trim();
   const nome = nomeParam ? nomeParam.split(" ")[0] : "";
+  // Hotmart anexa esses params na URL de retorno automaticamente:
+  //   ?transaction=HP123... &prod=... &off=z8ho36x1
+  const transaction = (sp.get("transaction") || "").trim();
+  const valorParam = Number(sp.get("valor") || "77");
+  const valor = Number.isFinite(valorParam) && valorParam > 0 ? valorParam : 77;
+
   // placeholder — quando o Mureka estiver plugado, esse src vira o link do mp3 gerado
   const musicaSrc = "/audio/diagnostico.mp3";
 
   useEffect(() => {
-    track("obrigado_view", { tem_nome: nome.length > 0 });
-  }, [nome]);
+    track("obrigado_view", { tem_nome: nome.length > 0, tem_transaction: !!transaction });
+
+    // Purchase — dispara UMA VEZ por transaction (dedupe via localStorage).
+    // eventID casa com CAPI server-side (Meta deduplica automaticamente).
+    if (typeof window === "undefined") return;
+    const key = `hmh_purchase_fired_${transaction || "notrans"}`;
+    const alreadyFired = transaction && window.localStorage.getItem(key) === "1";
+    if (alreadyFired) return;
+
+    trackMeta("Purchase", {
+      value: valor,
+      currency: "BRL",
+      content_ids: ["hmh-imersao-77"],
+      content_name: "Imersão HMH",
+      content_type: "product",
+      eventID: transaction || undefined,
+    });
+
+    if (transaction) window.localStorage.setItem(key, "1");
+  }, [nome, transaction, valor]);
 
   return (
     <main className="flex min-h-dvh w-full items-start justify-center bg-background px-4 py-8 sm:items-center">

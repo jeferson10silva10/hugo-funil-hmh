@@ -20,7 +20,8 @@ const POSTHOG_HOST = process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posth
 const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID;
 
 /* ============ TIPOS ============ */
-type EventProps = Record<string, string | number | boolean | undefined>;
+type EventValue = string | number | boolean | undefined | string[] | number[];
+type EventProps = Record<string, EventValue>;
 
 /* ============ PROVIDER (envolve o app) ============ */
 export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
