@@ -18,7 +18,7 @@ import {
 import { track, trackMeta } from "@/lib/analytics";
 
 const GRUPO_VIP_URL = "https://www.redirectmais.com/sun/gruposvip";
-const HOTMART_PLATAFORMA_URL = "https://hotmart.com/pt-br/purchase";
+const HOTMART_PLATAFORMA_URL = "https://hotmart.com/pt-br/club/herdeiros-do-sucesso/";
 
 /**
  * Página de obrigado — hierarquia:
