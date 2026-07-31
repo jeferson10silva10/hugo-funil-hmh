@@ -218,8 +218,16 @@ export async function POST(req: Request) {
   }
 }
 
-// Healthcheck — facilita conferir se o deploy pegou as env vars
+// Healthcheck — facilita conferir se o deploy pegou as env vars.
+// Também expõe o TOTAL de itens na fila de recuperação (só o número, sem dados
+// de pessoas — não é sensível).
 export async function GET() {
+  let filaTotal: number | null = null;
+  try {
+    filaTotal = await kv.zcard("recuperacao:fila");
+  } catch {
+    filaTotal = null;
+  }
   return NextResponse.json({
     ok: true,
     endpoint: "hotmart-webhook",
@@ -228,6 +236,7 @@ export async function GET() {
       process.env.WHATSAPP_PHONE_NUMBER_ID && process.env.WHATSAPP_TOKEN
     ),
     cronSecretConfigurado: !!process.env.CRON_SECRET,
+    carrinhosNaFilaRecuperacao: filaTotal,
     eventosTratados: {
       encerramento: Array.from(EVENTOS_ENCERRAMENTO),
       pendencia: Object.keys(EVENTOS_PENDENCIA),
