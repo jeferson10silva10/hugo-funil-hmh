@@ -224,6 +224,10 @@ export async function GET() {
     ok: true,
     endpoint: "hotmart-webhook",
     hottokConfigurado: !!process.env.HOTMART_HOTTOK,
+    whatsappConfigurado: !!(
+      process.env.WHATSAPP_PHONE_NUMBER_ID && process.env.WHATSAPP_TOKEN
+    ),
+    cronSecretConfigurado: !!process.env.CRON_SECRET,
     eventosTratados: {
       encerramento: Array.from(EVENTOS_ENCERRAMENTO),
       pendencia: Object.keys(EVENTOS_PENDENCIA),
