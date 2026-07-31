@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Script from "next/script";
 import { ShieldCheck, Sparkles, CheckCircle2, Flame, Clock } from "lucide-react";
 import { track, trackMeta } from "@/lib/analytics";
+import { PurchaseTracker } from "@/components/PurchaseTracker";
 
 const PANDA_UPSELL_SRC =
   "https://player-vz-76736fd2-919.tv.pandavideo.com.br/embed/?v=935035be-3f07-42be-9870-bf6a1b0d87ac&autoplay=1&preload=metadata";
@@ -54,6 +55,10 @@ export default function UpsellPage() {
 
   return (
     <>
+      {/* Purchase do produto principal — esta é a URL de "Compras Aprovadas" do
+          Hotmart, então o comprador cai aqui primeiro. Deduplicado por transaction. */}
+      <PurchaseTracker />
+
       <main className="min-h-dvh w-full bg-background pb-16">
         {/* Barra de topo — confirmação */}
         <div className="border-b border-emerald-500/30 bg-emerald-500/10 py-2 text-center">

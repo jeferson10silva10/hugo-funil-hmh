@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Script from "next/script";
 import { Sparkles, Gift, ShieldCheck, Flame } from "lucide-react";
 import { track, trackMeta } from "@/lib/analytics";
+import { PurchaseTracker } from "@/components/PurchaseTracker";
 
 /**
  * DOWNSELL 2 — Libertação da Trava Enraizada (oferta 77wy5zwx / R$397)
@@ -63,6 +64,10 @@ export default function DowsellPage() {
 
   return (
     <>
+      {/* Rede de segurança: se o comprador recusou o upsell e caiu aqui sem que
+          o Purchase tivesse disparado, dispara agora. Deduplicado por transaction. */}
+      <PurchaseTracker />
+
       <main className="min-h-dvh w-full bg-background pb-16">
         <div className="mx-auto w-full max-w-2xl px-4 pt-6 sm:pt-10">
           {/* Hero */}
