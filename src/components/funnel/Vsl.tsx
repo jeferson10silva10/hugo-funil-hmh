@@ -111,7 +111,8 @@ function Countdown() {
 const GIFTS = [
   { title: "Bônus 1: Protocolo Katsu — Resultado em 5 Dias", value: "R$297" },
   { title: "Bônus 2: Curso Heranças da Mentalidade — Acesso Vitalício", value: "R$397" },
-  { title: "Bônus 3: Mapeamento da Mente — Sessão individual de 30 min", value: "R$597" },
+  { title: "Bônus 3: Sua Música da Frequência da Riqueza (528Hz)", value: "R$197" },
+  { title: "Bônus 4: Mapeamento da Mente — Sessão individual de 30 min", value: "R$597" },
 ];
 
 const LOTE1_ITEMS = [
@@ -231,11 +232,11 @@ export function Vsl() {
           <Gift className="h-5 w-5 text-gold" /> Presentes que você ganha assistindo
         </p>
         <p className="mt-1 text-sm text-muted-foreground">
-          Continue assistindo — os <strong className="text-foreground">2 presentes</strong> serão liberados ao vivo pra você.
+          Continue assistindo — os <strong className="text-foreground">4 presentes</strong> serão liberados ao vivo pra você.
         </p>
         <div className="mt-3 space-y-3">
           {GIFTS.map((g, i) => {
-            // Bonus 1 e 2 liberam no primeiro gatilho; Bonus 3 (musica) libera com a oferta
+            // Bônus 1 e 2 liberam cedo; 3 e 4 (o Mapeamento, mais forte, por último) com a oferta
             const unlocked = i < 2 ? gift1 : offerOpen;
             if (unlocked) {
               return (
