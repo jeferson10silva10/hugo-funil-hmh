@@ -35,12 +35,13 @@ export type Etapa = {
 
 export const REGUA: Etapa[] = [
   {
-    id: "e1_30min",
-    aposMinutos: 30,
-    template: "hmh_pagamento_pendente_30min",
+    id: "e1_5min",
+    aposMinutos: 5,
+    template: "hmh_pix_pendente_5min",
     texto: (nome) =>
-      `${nome}, sua vaga na Imersão está reservada mas o pagamento ainda não caiu. ` +
-      `O código continua válido — é só finalizar por aqui 👇`,
+      `Oi ${nome}! Vi que você gerou o PIX pra garantir sua vaga mas o ` +
+      `pagamento ainda não caiu. O código continua válido — é só finalizar ` +
+      `por aqui pra não perder a vaga 👇`,
   },
   {
     id: "e2_3h",

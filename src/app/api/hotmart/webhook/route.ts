@@ -186,8 +186,27 @@ export async function POST(req: Request) {
       });
     }
 
-    /* ---------- FLUXO 2: pendência → entra na fila de recuperação ---------- */
-    const motivo = EVENTOS_PENDENCIA[evento];
+    /* ---------- FLUXO 2: pendência → entra na fila de recuperação ----------
+       Além dos eventos mapeados, tratamos QUALQUER compra com status de
+       pagamento pendente (PIX/boleto gerado e não pago). O Hotmart nem sempre
+       usa um evento dedicado pra "PIX gerado" — às vezes vem como PURCHASE_*
+       com status waiting_payment. Cobrimos os dois casos. */
+    const statusPurchase = String(purchase.status || "").toUpperCase();
+    const tipoPagamento = String(purchase.payment?.type || "").toUpperCase();
+    const pendentePorStatus =
+      statusPurchase.includes("WAITING") ||
+      statusPurchase.includes("PENDING") ||
+      statusPurchase === "PRINTED_BILLET" ||
+      statusPurchase === "PIX_EXPIRED";
+
+    const motivo =
+      EVENTOS_PENDENCIA[evento] ||
+      (pendentePorStatus
+        ? tipoPagamento === "PIX"
+          ? "pix_ou_boleto_pendente"
+          : "pix_ou_boleto_pendente"
+        : undefined);
+
     if (motivo) {
       if (!telefone && !email) {
         console.warn("[hotmart-webhook] pendência sem contato — ignorada", { transaction });
