@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import {
   Award, ArrowRight, Lock, Sparkles, ShieldCheck, Volume2, VolumeX, AlertTriangle,
   Coins, TrendingDown, Sprout,
@@ -15,7 +16,11 @@ import {
 } from "lucide-react";
 import { QUIZ_QUESTIONS, PERFIS, calcularArquetipo, citarResposta, type Arquetipo } from "@/data/quiz";
 import { track, trackMeta } from "@/lib/analytics";
-import { Vsl } from "./Vsl";
+
+// Lazy — a VSL (com canvas-confetti + ícones extras) só carrega quando a
+// pessoa chega no último estágio do funil. Sem isso, o JS dela entrava no
+// bundle inicial da Landing e inflava o Total Blocking Time (~1s no PageSpeed).
+const Vsl = dynamic(() => import("./Vsl").then((m) => m.Vsl), { ssr: false });
 
 type Stage = "landing" | "quiz" | "nome" | "loading" | "diagnostico" | "experiencia" | "calibracao" | "bridge" | "vsl";
 
