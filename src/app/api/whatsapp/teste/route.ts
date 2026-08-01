@@ -128,6 +128,23 @@ export async function GET(req: Request) {
     return NextResponse.json({ templates: await criarTemplates() });
   }
 
+  // ?status_templates=1 → lista os templates e o status de aprovação
+  if (url.searchParams.get("status_templates")) {
+    const token = process.env.WHATSAPP_TOKEN;
+    const versao = process.env.WHATSAPP_API_VERSION || "v21.0";
+    const wabaId = "970188032654595";
+    try {
+      const r = await fetch(
+        `https://graph.facebook.com/${versao}/${wabaId}/message_templates?fields=name,status,category,language&limit=50`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const texto = await r.text();
+      return NextResponse.json(r.ok ? JSON.parse(texto) : { status: r.status, erro: texto.slice(0, 300) });
+    } catch (e) {
+      return NextResponse.json({ erro: e instanceof Error ? e.message : String(e) });
+    }
+  }
+
   const to = url.searchParams.get("to") || "";
   const phoneIdOverride = url.searchParams.get("phone_id");
   if (phoneIdOverride) {
