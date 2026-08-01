@@ -128,6 +128,33 @@ export async function GET(req: Request) {
     return NextResponse.json({ templates: await criarTemplates() });
   }
 
+  // ?billing=1 → info de cobrança/saldo da WABA
+  if (url.searchParams.get("billing")) {
+    const token = process.env.WHATSAPP_TOKEN;
+    const versao = process.env.WHATSAPP_API_VERSION || "v21.0";
+    const wabaId = "970188032654595";
+    const out: Record<string, unknown> = {};
+    try {
+      const r1 = await fetch(
+        `https://graph.facebook.com/${versao}/${wabaId}?fields=name,account_review_status,business_verification_status,message_template_namespace,currency,timezone_id`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      out.waba = JSON.parse(await r1.text());
+    } catch (e) {
+      out.waba = { erro: e instanceof Error ? e.message : String(e) };
+    }
+    try {
+      const r2 = await fetch(
+        `https://graph.facebook.com/${versao}/${wabaId}/phone_numbers?fields=display_phone_number,verified_name,quality_rating,messaging_limit_tier,status,throughput`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      out.numeros = JSON.parse(await r2.text());
+    } catch (e) {
+      out.numeros = { erro: e instanceof Error ? e.message : String(e) };
+    }
+    return NextResponse.json(out);
+  }
+
   // ?status_templates=1 → lista os templates e o status de aprovação
   if (url.searchParams.get("status_templates")) {
     const token = process.env.WHATSAPP_TOKEN;
