@@ -129,6 +129,38 @@ const LOTE2_ITEMS = [
   "Bônus podem não estar disponíveis",
 ];
 
+/* Explicação de cada bônus — constrói valor antes do preço */
+const BONUS_DETALHE = [
+  {
+    emoji: "🔥",
+    titulo: "Protocolo Katsu — 5 Dias",
+    valor: "R$297",
+    texto:
+      "Um desafio de 5 dias gravado que usa o Katsu (喝) da tradição oriental pra quebrar o padrão de estagnação. Você faz no seu ritmo e sente o resultado já nos primeiros dias.",
+  },
+  {
+    emoji: "🎓",
+    titulo: "Curso Heranças da Mentalidade",
+    valor: "R$397",
+    texto:
+      "O método completo gravado onde o Hugo ensina, passo a passo, como identificar e remover a Herança Mental que sabota seu sucesso. Acesso vitalício — reveja quantas vezes quiser.",
+  },
+  {
+    emoji: "🎵",
+    titulo: "Música da Frequência da Riqueza",
+    valor: "R$197",
+    texto:
+      "Uma música criada exclusivamente com o SEU nome, em frequência 528Hz — a frequência da abundância. Ouça toda manhã por 21 dias e reprograme sua mente pra prosperidade.",
+  },
+  {
+    emoji: "🧠",
+    titulo: "Mapeamento da Mente — Sessão Individual",
+    valor: "R$597",
+    texto:
+      "30 minutos individuais com um Estrategista da Mente treinado pelo Hugo. Ele identifica a SUA Herança Mental específica e traça o mapa exato do que está te travando. Apenas 10 vagas.",
+  },
+];
+
 const COMPARISON: [string, string][] = [
   ["Só conhecimento — a Herança continua mais forte", "Remove a Herança na raiz, ao vivo"],
   ["Você aplica sozinho (e trava)", "O Hugo te guia pessoalmente"],
@@ -306,6 +338,36 @@ export function Vsl() {
           <strong className="text-foreground"> sua música personalizada</strong> e uma
           <strong className="text-foreground"> sessão individual de Mapeamento da Mente</strong>.
         </p>
+      </div>
+
+      {/* Entenda cada bônus — constrói valor antes do preço */}
+      <div className="mt-8">
+        <p className="text-center text-xs font-semibold uppercase tracking-[0.22em] text-gold">
+          Entenda o que você recebe
+        </p>
+        <div className="mt-4 space-y-3">
+          {BONUS_DETALHE.map((b) => (
+            <div
+              key={b.titulo}
+              className="ring-hairline flex gap-3 rounded-2xl bg-card p-4 shadow-sm"
+            >
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gold/10 text-2xl">
+                {b.emoji}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-baseline justify-between gap-2">
+                  <h3 className="font-display text-[15px] font-semibold leading-tight text-foreground">
+                    {b.titulo}
+                  </h3>
+                  <span className="shrink-0 text-xs font-bold text-gold">{b.valor}</span>
+                </div>
+                <p className="mt-1 text-[13.5px] leading-relaxed text-muted-foreground">
+                  {b.texto}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Tabela comparativa */}
