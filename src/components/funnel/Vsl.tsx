@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { PANDA_VSL_SRC, CHECKOUT_IMERSAO } from "@/data/quiz";
 import { track, trackMeta } from "@/lib/analytics";
+import { useVisivelUmaVez } from "@/hooks/useVisivelUmaVez";
 
 /* ⌛ Liberação por tempo (em segundos) — a página abre com presentes/oferta bloqueados */
 const T_GIFT_1 = 60;        // 1 min → libera Presente 1 + confete pequeno
@@ -173,6 +174,12 @@ export function Vsl() {
   const [gift1, setGift1] = useState(false);
   const [offerOpen, setOfferOpen] = useState(false);
   const firedRef = useRef({ g1: false, off: false });
+
+  // Dispara quando o card de PREÇO entra de fato na tela — diferente de
+  // offer_unlock (que é só o timer). Permite medir "viu o preço e não clicou".
+  const precoRef = useVisivelUmaVez<HTMLDivElement>("funnel_oferta_visivel", {
+    preco: 197,
+  });
 
   useEffect(() => {
     track("funnel_vsl_view");
@@ -407,7 +414,7 @@ export function Vsl() {
       <Countdown />
 
       {/* 1º Lote — card premium escuro */}
-      <div className="hm-glow hm-fade-up bg-gold-foil mt-6 rounded-3xl p-[2px]">
+      <div ref={precoRef} className="hm-glow hm-fade-up bg-gold-foil mt-6 rounded-3xl p-[2px]">
         <div className="bg-navy-grad relative overflow-hidden rounded-[calc(1.85rem-2px)] px-6 pb-6 pt-6 text-center text-white">
           <div className="flex items-center justify-between gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-gold">
