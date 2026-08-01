@@ -324,6 +324,17 @@ export function Vsl() {
         </div>
       </div>
 
+      {/* Banner visual da oferta */}
+      <div className="mt-8 overflow-hidden rounded-2xl shadow-elevated ring-1 ring-gold/30">
+        <Image
+          src="/images/banner-imersao-197.webp"
+          alt="Imersão Heranças da Mentalidade de Sucesso — 15 e 16 de agosto · Condição exclusiva + 4 bônus por R$197"
+          width={1400}
+          height={788}
+          className="h-auto w-full"
+        />
+      </div>
+
       <div className="mt-8 text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-gold">
           A Oferta Completa
