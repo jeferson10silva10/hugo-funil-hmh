@@ -42,7 +42,7 @@ function fireConfetti(intensity: "small" | "big" = "small") {
 function GreenCTA({ children, position }: { children: React.ReactNode; position: string }) {
   const handleClick = () => {
     track("funnel_offer_cta_click", { position });
-    trackMeta("InitiateCheckout", { content_name: "Imersão HMH", value: 77, currency: "BRL", position });
+    trackMeta("InitiateCheckout", { content_name: "Imersão HMH", value: 197, currency: "BRL", position });
   };
   return (
     <a
@@ -56,8 +56,8 @@ function GreenCTA({ children, position }: { children: React.ReactNode; position:
   );
 }
 
-/* Countdown REAL até a Imersão (01/08/2026 09:30, horário de Brasília) */
-const IMERSAO_TARGET = new Date("2026-08-01T09:30:00-03:00").getTime();
+/* Countdown REAL até a Imersão (15/08/2026 09:30, horário de Brasília) */
+const IMERSAO_TARGET = new Date("2026-08-15T09:30:00-03:00").getTime();
 
 function Countdown() {
   const [secs, setSecs] = useState<number | null>(null);
@@ -102,25 +102,25 @@ function Countdown() {
         ))}
       </div>
       <p className="mt-4 text-[15px] font-medium leading-relaxed text-white/90">
-        Sábado 01/08 · 9h30 às 17h30 &nbsp;+&nbsp; Domingo 02/08 · 15h às 18h
+        Sábado 15/08 · 9h30 às 17h30 &nbsp;+&nbsp; Domingo 16/08 · 15h às 18h
       </p>
     </div>
   );
 }
 
 const GIFTS = [
-  { title: "Bônus 1: Katsu Desafio — Resultado em 5 Dias", value: "R$197" },
-  { title: "Bônus 2: Curso HMH gravado — Acesso Vitalício", value: "R$497" },
-  { title: "Bônus 3: Sua Música Angelical da Frequência da Prosperidade", value: "R$97" },
+  { title: "Bônus 1: Protocolo Katsu — Resultado em 5 Dias", value: "R$297" },
+  { title: "Bônus 2: Curso Heranças da Mentalidade — Acesso Vitalício", value: "R$397" },
+  { title: "Bônus 3: Mapeamento da Mente — Sessão individual de 30 min", value: "R$597" },
 ];
 
 const LOTE1_ITEMS = [
-  { bold: "Imersão HMH — 2 dias AO VIVO", rest: " · Sábado 01/08 (9h30–17h30) + Domingo 02/08 (15h–18h)" },
-  { bold: "Bônus 1:", rest: " Katsu Desafio — resultado em 5 dias (gravado no Hotmart)" },
-  { bold: "Bônus 2:", rest: " Curso HMH gravado — acesso vitalício (rever quantas vezes quiser)" },
-  { bold: "Bônus 3:", rest: " Sua Música Angelical da Frequência da Prosperidade (personalizada com seu nome, 528Hz)" },
+  { bold: "Imersão HMH — AO VIVO com Hugo", rest: " · 15 e 16 de agosto" },
+  { bold: "Bônus 1:", rest: " Protocolo Katsu — resultado em 5 dias (gravado, acesso vitalício)" },
+  { bold: "Bônus 2:", rest: " Curso Heranças da Mentalidade — gravado, acesso vitalício (rever quantas vezes quiser)" },
+  { bold: "Bônus 3:", rest: " Sua Música da Frequência da Riqueza (personalizada com seu nome, 528Hz)" },
+  { bold: "Bônus 4:", rest: " Mapeamento da Mente — sessão individual de 30 min com um Estrategista da Mente treinado pelo Hugo (apenas 10 vagas)" },
   { bold: "", rest: "Grupo VIP no WhatsApp" },
-  { bold: "", rest: "Reunião tira-dúvidas com Hugo Miyazaki" },
 ];
 
 const LOTE2_ITEMS = [
@@ -297,13 +297,14 @@ export function Vsl() {
           A Oferta Completa
         </p>
         <h2 className="font-display mt-1 text-[1.7rem] font-semibold leading-tight tracking-tight text-foreground">
-          Acesso à Imersão + 3 Bônus Exclusivos que valem <span className="text-gold-foil">R$ 791</span>
+          Acesso à Imersão + 4 Bônus Exclusivos que valem <span className="text-gold-foil">R$ 1.985</span>
         </h2>
         <p className="mx-auto mt-2 max-w-sm text-[15px] text-muted-foreground">
           A Imersão é o <strong className="text-foreground">workshop online ao vivo</strong> que o
           Hugo mostrou no vídeo — com ele te ajudando pessoalmente a remover a sua Herança —
-          <strong className="text-foreground"> mais o curso pra rever quando quiser</strong> e a
-          <strong className="text-foreground"> sua música personalizada</strong>.
+          mais o <strong className="text-foreground">curso gravado</strong>, a
+          <strong className="text-foreground"> sua música personalizada</strong> e uma
+          <strong className="text-foreground"> sessão individual de Mapeamento da Mente</strong>.
         </p>
       </div>
 
@@ -344,10 +345,13 @@ export function Vsl() {
           </div>
 
           <p className="hm-shine text-gold-foil font-display mt-3 inline-block text-6xl font-bold leading-none">
-            R$ 77
+            R$ 197
+          </p>
+          <p className="mt-1 text-sm text-white/70">
+            ou <strong className="text-white">12x R$ 19,70</strong>
           </p>
           <p className="mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-gold">
-            Próxima Turma · Vagas Limitadas
+            15 e 16 de agosto · Apenas 10 vagas
           </p>
 
           <ul className="mt-5 space-y-3 text-left">
@@ -376,7 +380,7 @@ export function Vsl() {
         <span className="inline-flex items-center gap-1.5 rounded-full bg-muted-foreground/60 px-4 py-1.5 text-sm font-bold text-white">
           <Medal className="h-4 w-4" /> 2º LOTE
         </span>
-        <p className="font-display mt-3 text-5xl font-bold text-muted-foreground">R$ 147</p>
+        <p className="font-display mt-3 text-5xl font-bold text-muted-foreground">R$ 397</p>
         <p className="mt-1 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           Valor Normal — Em Breve
         </p>
