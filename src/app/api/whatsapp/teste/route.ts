@@ -71,7 +71,7 @@ async function criarTemplates() {
         {
           type: "BODY",
           text:
-            "{{1}}, passando pra avisar: sua reserva na Imersão HMH expira hoje. Depois disso a vaga volta pro lote e o valor muda. Finaliza aqui 👇",
+            "Oi {{1}}, passando pra avisar: sua reserva na Imersão HMH expira hoje. Depois disso a vaga volta pro lote e o valor muda. Finaliza aqui 👇",
           example: { body_text: [["Maria"]] },
         },
       ],
@@ -84,7 +84,7 @@ async function criarTemplates() {
         {
           type: "BODY",
           text:
-            "{{1}}, última chamada. Sua vaga sai da reserva em 2 horas. Se ainda quiser participar, é agora 👇",
+            "Oi {{1}}, última chamada: sua vaga sai da reserva em 2 horas. Se ainda quiser participar, é agora 👇",
           example: { body_text: [["Maria"]] },
         },
       ],
