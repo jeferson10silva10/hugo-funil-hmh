@@ -125,10 +125,17 @@ function ObrigadoInner() {
               </div>
             </div>
 
-            <ul className="mt-5 space-y-2 text-[13.5px] leading-relaxed text-foreground/85">
+            <div className="mt-5 flex items-center justify-center gap-2 rounded-2xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-center">
+              <span className="text-lg">📅</span>
+              <p className="text-sm font-bold text-emerald-700">
+                Imersão AO VIVO: 15 e 16 de agosto
+              </p>
+            </div>
+
+            <ul className="mt-4 space-y-2 text-[13.5px] leading-relaxed text-foreground/85">
               <li className="flex gap-2">
                 <span className="mt-0.5 text-emerald-600">✓</span>
-                <span>Data e horário do evento AO VIVO</span>
+                <span>Horário e link de acesso liberados no grupo</span>
               </li>
               <li className="flex gap-2">
                 <span className="mt-0.5 text-emerald-600">✓</span>
