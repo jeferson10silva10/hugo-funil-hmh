@@ -41,6 +41,75 @@ async function listarNumerosDasWabas() {
   return resultado;
 }
 
+/** Cria os 3 templates de recuperação na WABA "Hugo Miyazaki Suporte". */
+async function criarTemplates() {
+  const token = process.env.WHATSAPP_TOKEN;
+  const versao = process.env.WHATSAPP_API_VERSION || "v21.0";
+  // WABA que o token acessa e onde o número +55 18 está registrado
+  const wabaId = "970188032654595";
+  if (!token) return { erro: "sem_token" };
+
+  const templates = [
+    {
+      name: "hmh_pix_pendente_5min",
+      category: "UTILITY",
+      language: "pt_BR",
+      components: [
+        {
+          type: "BODY",
+          text:
+            "Oi {{1}}! Vi que você gerou o PIX pra garantir sua vaga mas o pagamento ainda não caiu. O código continua válido — é só finalizar por aqui pra não perder a vaga 👇",
+          example: { body_text: [["Maria"]] },
+        },
+      ],
+    },
+    {
+      name: "hmh_pagamento_pendente_3h",
+      category: "UTILITY",
+      language: "pt_BR",
+      components: [
+        {
+          type: "BODY",
+          text:
+            "{{1}}, passando pra avisar: sua reserva na Imersão HMH expira hoje. Depois disso a vaga volta pro lote e o valor muda. Finaliza aqui 👇",
+          example: { body_text: [["Maria"]] },
+        },
+      ],
+    },
+    {
+      name: "hmh_pagamento_pendente_24h",
+      category: "UTILITY",
+      language: "pt_BR",
+      components: [
+        {
+          type: "BODY",
+          text:
+            "{{1}}, última chamada. Sua vaga sai da reserva em 2 horas. Se ainda quiser participar, é agora 👇",
+          example: { body_text: [["Maria"]] },
+        },
+      ],
+    },
+  ];
+
+  const resultado: Record<string, unknown> = {};
+  for (const t of templates) {
+    try {
+      const r = await fetch(`https://graph.facebook.com/${versao}/${wabaId}/message_templates`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify(t),
+      });
+      const texto = await r.text();
+      resultado[t.name] = r.ok
+        ? { status: "criado", resposta: JSON.parse(texto) }
+        : { status: r.status, erro: texto.slice(0, 300) };
+    } catch (e) {
+      resultado[t.name] = { erro: e instanceof Error ? e.message : String(e) };
+    }
+  }
+  return resultado;
+}
+
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const hottok = url.searchParams.get("hottok");
@@ -52,6 +121,11 @@ export async function GET(req: Request) {
   // ?listar=1 → descobre quais números o token acessa (não envia nada)
   if (url.searchParams.get("listar")) {
     return NextResponse.json({ numeros: await listarNumerosDasWabas() });
+  }
+
+  // ?criar_templates=1 → cria os 3 templates de recuperação na WABA
+  if (url.searchParams.get("criar_templates")) {
+    return NextResponse.json({ templates: await criarTemplates() });
   }
 
   const to = url.searchParams.get("to") || "";
