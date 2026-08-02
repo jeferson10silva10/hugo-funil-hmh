@@ -197,6 +197,6 @@ export function citarResposta(answers: string[], qId: number): string | null {
 export const PANDA_VSL_SRC =
   "https://player-vz-76736fd2-919.tv.pandavideo.com.br/embed/?v=b3cdb18e-5517-4a50-987c-0337ea0b7f8e&autoplay=1&preload=metadata";
 
-// Oferta de teste R$197 (off=ik8hwk4z). Oferta antiga R$77 era off=z8ho36x1.
+// Oferta R$77 (off=z8ho36x1) — exibida como 11x de R$8,27. R$197 era off=ik8hwk4z.
 export const CHECKOUT_IMERSAO =
-  "https://pay.hotmart.com/N103472724M?off=ik8hwk4z&checkoutMode=10";
+  "https://pay.hotmart.com/N103472724M?off=z8ho36x1&checkoutMode=10";

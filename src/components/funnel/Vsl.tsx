@@ -43,7 +43,7 @@ function fireConfetti(intensity: "small" | "big" = "small") {
 function GreenCTA({ children, position }: { children: React.ReactNode; position: string }) {
   const handleClick = () => {
     track("funnel_offer_cta_click", { position });
-    trackMeta("InitiateCheckout", { content_name: "Imersão HMH", value: 197, currency: "BRL", position });
+    trackMeta("InitiateCheckout", { content_name: "Imersão HMH", value: 77, currency: "BRL", position });
   };
   return (
     <a
@@ -178,7 +178,7 @@ export function Vsl() {
   // Dispara quando o card de PREÇO entra de fato na tela — diferente de
   // offer_unlock (que é só o timer). Permite medir "viu o preço e não clicou".
   const precoRef = useVisivelUmaVez<HTMLDivElement>("funnel_oferta_visivel", {
-    preco: 197,
+    preco: 77,
   });
 
   useEffect(() => {
@@ -332,13 +332,13 @@ export function Vsl() {
         </div>
       </div>
 
-      {/* Banner visual da oferta */}
+      {/* Banner visual da oferta (sem preço — congruente com R$77) */}
       <div className="mt-8 overflow-hidden rounded-2xl shadow-elevated ring-1 ring-gold/30">
         <Image
-          src="/images/banner-imersao-197.webp"
-          alt="Imersão Heranças da Mentalidade de Sucesso — 15 e 16 de agosto · Condição exclusiva + 4 bônus por R$197"
+          src="/images/banner-imersao.webp"
+          alt="Imersão Heranças da Mentalidade do Sucesso — 15 e 16 de agosto, online e ao vivo, com 4 bônus exclusivos"
           width={1400}
-          height={788}
+          height={786}
           className="h-auto w-full"
         />
       </div>
@@ -425,11 +425,14 @@ export function Vsl() {
             </span>
           </div>
 
-          <p className="hm-shine text-gold-foil font-display mt-3 inline-block text-6xl font-bold leading-none">
-            R$ 197
+          <p className="mt-3 text-sm font-semibold uppercase tracking-[0.2em] text-white/70">
+            11x de
           </p>
-          <p className="mt-1 text-sm text-white/70">
-            ou <strong className="text-white">12x R$ 19,70</strong>
+          <p className="hm-shine text-gold-foil font-display inline-block text-7xl font-bold leading-none">
+            R$ 8,27
+          </p>
+          <p className="mt-2 text-sm text-white/70">
+            ou <strong className="text-white">R$ 77,00 à vista</strong>
           </p>
           <p className="mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-gold">
             15 e 16 de agosto · Apenas 10 vagas
