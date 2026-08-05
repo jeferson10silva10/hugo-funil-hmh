@@ -48,7 +48,7 @@ export async function sendPurchaseCapi(args: PurchaseCapiArgs): Promise<void> {
         custom_data: {
           currency: "BRL",
           value: args.value,
-          content_ids: ["hmh-imersao-77"],
+          content_ids: ["6838813"],
           content_name: "Imersão HMH",
           content_type: "product",
         },

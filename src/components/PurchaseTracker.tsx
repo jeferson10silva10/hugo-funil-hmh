@@ -54,7 +54,7 @@ function PurchaseTrackerInner({ valorPadrao }: { valorPadrao: number }) {
     trackMeta("Purchase", {
       value: valor,
       currency: "BRL",
-      content_ids: ["hmh-imersao-77"],
+      content_ids: ["6838813"],
       content_name: "Imersão HMH",
       content_type: "product",
       eventID: transaction,
