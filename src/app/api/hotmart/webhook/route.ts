@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { kv } from "@vercel/kv";
 import { generateSong, letraFrequenciaRiqueza, PROMPT_FREQUENCIA_RIQUEZA } from "@/lib/mureka";
 import { enfileirar, desenfileirar, type MotivoPendencia } from "@/lib/recuperacao";
+import { sendPurchaseCapi } from "@/lib/metaCapi";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -164,6 +165,19 @@ export async function POST(req: Request) {
         murekaErro = e instanceof Error ? e.message : String(e);
         console.error("[hotmart-webhook] falha ao gerar musica", { transaction, murekaErro });
         // Não falha o webhook — a /obrigado tem fallback que gera on-demand
+      }
+
+      // Dispara o Purchase pro Meta direto do servidor — não depende do
+      // navegador do comprador voltar pro site (pixel client-side é só reforço).
+      try {
+        await sendPurchaseCapi({ transaction, value: valor, email, telefone });
+        console.log("[hotmart-webhook] Purchase enviado ao Meta CAPI", { transaction });
+      } catch (e) {
+        console.error("[hotmart-webhook] falha ao enviar Meta CAPI", {
+          transaction,
+          erro: e instanceof Error ? e.message : String(e),
+        });
+        // Não falha o webhook — a venda já foi processada
       }
 
       const venda: VendaKV = {
